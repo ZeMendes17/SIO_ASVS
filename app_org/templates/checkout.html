@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Basic -->
+
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- Mobile Metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Site Metas -->
+    <title>ThewayShop - Ecommerce Bootstrap 4 HTML Template</title>
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+
+    <!-- Site Icons -->
+    <link
+      rel="shortcut icon"
+      href="../static/images/favicon.ico"
+      type="image/x-icon"
+    />
+    <link rel="apple-touch-icon" href="../static/images/apple-touch-icon.png" />
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css" />
+    <!-- Site CSS -->
+    <link rel="stylesheet" href="../static/css/style.css" />
+    <!-- Responsive CSS -->
+    <link rel="stylesheet" href="../static/css/responsive.css" />
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../static/css/custom.css" />
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.../static/js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <!-- Start Main Top -->
+    <header class="main-header">
+      <!-- Start Navigation -->
+      <nav
+        class="navbar navbar-expand-lg navbar-light bg-light navbar-default bootsnav"
+      >
+        <div class="container">
+          <!-- Start Header Navigation -->
+          <div class="navbar-header">
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-toggle="collapse"
+              data-target="#navbar-menu"
+              aria-controls="navbars-rs-food"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+            >
+              <i class="fa fa-bars"></i>
+            </button>
+            <a class="navbar-brand" href="/"
+              ><img
+                src="../static/images/logo-deti-black.png"
+                style="width: 300px"
+                class="logo"
+                alt=""
+            /></a>
+          </div>
+          <!-- End Header Navigation -->
+
+          <!-- Collect the nav links, forms, and other content for toggling -->
+          <div class="collapse navbar-collapse" id="navbar-menu">
+            <ul
+              class="nav navbar-nav ml-auto"
+              data-in="fadeInDown"
+              data-out="fadeOutUp"
+            >
+              <li class="nav-item active">
+                <a class="nav-link" href="/">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/shop">Products</a>
+              </li>
+
+              {% if current_user.is_authenticated %}
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown"
+                  ><i class="fa fa-user" aria-hidden="true"></i
+                ></a>
+                <ul class="dropdown-menu">
+                  <li><a href="/profile">My Account</a></li>
+                  <li><a href="/cart">Cart</a></li>
+                  <li><a href="/wishlist">Wishlist</a></li>
+                  {% if current_user.isAdmin %} <li><a href="/admin">Admin Page</a></li>{% endif %}
+                  <li class="nav-item">
+                    <a style="color: red" href="/logout">Logout</a>
+                  </li>
+                </ul>
+              </li>
+              <div class="attr-nav">
+                <ul>
+                  <li>
+                    <a href="/cart">
+                      <i class="fa fa-shopping-bag"></i>
+                      <span class="badge">{{ number_of_items }}</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+              {% else %}
+              <li class="nav-item">
+                <a class="nav-link" href="/login">Log In</a>
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+          <!-- /.navbar-collapse -->
+        </div>
+      </nav>
+      <!-- End Navigation -->
+    </header>
+    <!-- End Main Top -->
+
+    <!-- Start Top Search -->
+    <div class="top-search">
+      <div class="container">
+        <div class="input-group">
+          <span class="input-group-addon"><i class="fa fa-search"></i></span>
+          <input type="text" class="form-control" placeholder="Search" />
+          <span class="input-group-addon close-search"
+            ><i class="fa fa-times"></i
+          ></span>
+        </div>
+      </div>
+    </div>
+    <!-- End Top Search -->
+
+    <!-- Start All Title Box -->
+    <div class="all-title-box">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <h2>Checkout</h2>
+            <ul class="breadcrumb">
+              <li class="breadcrumb-item"><a href="#">Shop</a></li>
+              <li class="breadcrumb-item active">Checkout</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- End All Title Box -->
+    <div>
+      <p style="color: red">{{info}}</p>
+    </div>
+
+    <!-- Start Cart  -->
+    <form class="cart-box-main" action="/form_checkout" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="container">
+        <div class="row">
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+            messages%} {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" role="alert">
+            {{ message }}
+            </div>
+            {% endfor %} {% endif %} {% endwith %}
+          <div class="col-sm-6 col-lg-6 mb-3">
+            <div class="checkout-address">
+              <div class="title-left">
+                <h3>Billing and Shipping information</h3>
+              </div>
+              <form class="needs-validation" novalidate>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="firstName">First name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="firstName"
+                      name="firstname"
+                      placeholder=""
+                      value=""
+                    />
+                    <div class="invalid-feedback">
+                      Valid first name is required.
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="lastName">Last name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="lastName"
+                      name="lastname"
+                      placeholder=""
+                      value=""
+                    />
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="email">Email Address</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="email"
+                    name="email"
+                    placeholder=""
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="address">Shipping address *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="address"
+                    name="address"
+                    placeholder=""
+                    required
+                  />
+                  <div class="invalid-feedback">
+                    Please enter your shipping address.
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="address2">Billing address *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="address2"
+                    name="address2"
+                    placeholder=""
+                    required
+                  />
+                </div>
+                <div class="row">
+                  <div class="col-md-5 mb-3">
+                    <label for="country">Country</label>
+                    <select class="wide w-100" id="country" name="country">
+                      <option value="Choose..." data-display="Select">
+                        Choose...
+                      </option>
+                      <option value="United States">Portugal</option>
+                    </select>
+                    <div class="invalid-feedback">
+                      Please select a valid country.
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label for="state">State</label>
+                    <select class="wide w-100" id="state" name="state">
+                      <option data-display="Select">Choose...</option>
+                      <option>Aveiro</option>
+                      <option>Viseu</option>
+                      <option>Porto</option>
+                    </select>
+                    <div class="invalid-feedback">
+                      Please provide a valid state.
+                    </div>
+                  </div>
+                  <div class="col-md-3 mb-3">
+                    <label for="zip">Zip</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="zip"
+                      name="zip"
+                      placeholder=""
+                    />
+                    <div class="invalid-feedback">Zip code required.</div>
+                  </div>
+                </div>
+                <hr class="mb-4" />
+                <hr class="mb-4" />
+                <div class="title"><span>Payment</span></div>
+                <div class="d-block my-3">
+                  <div class="custom-control custom-radio">
+                    <input
+                      id="credit"
+                      name="paymentMethod"
+                      type="radio"
+                      class="custom-control-input"
+                      checked
+                    />
+                    <label class="custom-control-label" for="credit"
+                      >Credit card</label
+                    >
+                  </div>
+                  <div class="custom-control custom-radio">
+                    <input
+                      id="debit"
+                      name="paymentMethod"
+                      type="radio"
+                      class="custom-control-input"
+                    />
+                    <label class="custom-control-label" for="debit"
+                      >Debit card</label
+                    >
+                  </div>
+                  <div class="custom-control custom-radio">
+                    <input
+                      id="paypal"
+                      name="paymentMethod"
+                      type="radio"
+                      class="custom-control-input"
+                    />
+                    <label class="custom-control-label" for="paypal"
+                      >Paypal</label
+                    >
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="cc-name">Name on card</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="cc-name"
+                      name="cc-name"
+                      placeholder=""
+                    />
+                    <small class="text-muted"
+                      >Full name as displayed on card</small
+                    >
+                    <div class="invalid-feedback">Name on card is required</div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="cc-number">Credit card number</label>
+                    <input
+                      name="cc-number"
+                      type="text"
+                      class="form-control"
+                      id="cc-number"
+                      placeholder=""
+                    />
+                    <div class="invalid-feedback">
+                      Credit card number is required
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-3 mb-3">
+                    <label for="cc-expiration">Expiration</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="cc-expiration"
+                      name="cc-expiration"
+                      placeholder=""
+                    />
+                    <div class="invalid-feedback">Expiration date required</div>
+                  </div>
+                  <div class="col-md-3 mb-3">
+                    <label for="cc-expiration">CVV</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="cc-cvv"
+                      name="cc-cvv"
+                      placeholder=""
+                    />
+                    <div class="invalid-feedback">Security code required</div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <div class="payment-icon">
+                      <ul>
+                        <li>
+                          <img
+                            class="img-fluid"
+                            src="../static/images/payment-icon/1.png"
+                            alt=""
+                          />
+                        </li>
+                        <li>
+                          <img
+                            class="img-fluid"
+                            src="../static/images/payment-icon/2.png"
+                            alt=""
+                          />
+                        </li>
+                        <li>
+                          <img
+                            class="img-fluid"
+                            src="../static/images/payment-icon/3.png"
+                            alt=""
+                          />
+                        </li>
+                        <li>
+                          <img
+                            class="img-fluid"
+                            src="../static/images/payment-icon/5.png"
+                            alt=""
+                          />
+                        </li>
+                        <li>
+                          <img
+                            class="img-fluid"
+                            src="../static/images/payment-icon/7.png"
+                            alt=""
+                          />
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <hr class="mb-1" />
+              </form>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-6 mb-3">
+            <div class="row">
+              <div class="col-md-12 col-lg-12" id="shopping-cart">
+                <div class="odr-box">
+                    <div class="title-left">
+                        <h3>Shopping cart</h3>
+                    </div>
+                    <div class="rounded p-2 bg-light" id="product-list">
+                        {% for product in product_list %}
+                        <div class="media mb-2 border-bottom">
+                            <div class="media-body">
+                                <div>
+                                    <a href="#">{{ product.product_name }}</a>
+                                    <div class="small text-muted">
+                                        Price: ${{ product.price }} <span class="mx-2">|</span> Qty: {{ product_quantities[product.id] }}
+                                        <span class="mx-2">|</span> Subtotal: ${{ product.price * product.quantity }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="media-right">
+                                <img src="{{ product.image_name }}" alt="{{ product.product_name }}" width="50" height="50">
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+              </div>         
+              <div class="col-md-12 col-lg-12">
+                <div class="order-box">
+                  <div class="title-left">
+                    <h3>Your order</h3>
+                  </div>
+                  <div class="d-flex">
+                    <div class="font-weight-bold">Product</div>
+                    <div class="ml-auto font-weight-bold">Total</div>
+                  </div>
+                  <hr class="my-1" />
+                  <div class="d-flex">
+                    <h4>Sub Total</h4>
+                    <div class="ml-auto font-weight-bold">{{ '%.2f' % subtotal }}€</div>
+                  </div>
+                  <hr class="my-1" />
+                  <div class="d-flex">
+                    <h4>Tax</h4>
+                    <div class="ml-auto font-weight-bold">3.99€</div>
+                  </div>
+                  <div class="d-flex">
+                    <h4>Shipping Cost</h4>
+                    <div id="shippingCost" class="ml-auto font-weight-bold">4.99€</div>
+                  </div>                  
+                  <hr />
+                  <div class="d-flex gr-total">
+                    <h5>Grand Total</h5>
+                    <div class="ml-auto font-weight-bold">{{total}}€</div>
+                  </div>
+                  <hr />
+                </div>
+              </div>
+              <div class="col-12 d-flex shopping-box">
+                <button class="ml-auto btn hvr-hover" type="submit" action="/form_checkout"
+                  >Place Order</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+    <!-- End Cart -->
+
+    <!-- Start Footer  -->
+    <footer>
+      <div class="footer-main">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-4 col-md-12 col-sm-12">
+              <div class="footer-widget">
+                <h4>About ThewayShop</h4>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                  Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                  laboris nisi ut aliquip ex ea commodo consequat.
+                </p>
+                <ul>
+                  <li>
+                    <a href="#"
+                      ><i class="fab fa-facebook" aria-hidden="true"></i
+                    ></a>
+                  </li>
+                  <li>
+                    <a href="#"
+                      ><i class="fab fa-twitter" aria-hidden="true"></i
+                    ></a>
+                  </li>
+                  <li>
+                    <a href="#"
+                      ><i class="fab fa-linkedin" aria-hidden="true"></i
+                    ></a>
+                  </li>
+                  <li>
+                    <a href="#"
+                      ><i class="fab fa-google-plus" aria-hidden="true"></i
+                    ></a>
+                  </li>
+                  <li>
+                    <a href="#"><i class="fa fa-rss" aria-hidden="true"></i></a>
+                  </li>
+                  <li>
+                    <a href="#"
+                      ><i class="fab fa-pinterest-p" aria-hidden="true"></i
+                    ></a>
+                  </li>
+                  <li>
+                    <a href="#"
+                      ><i class="fab fa-whatsapp" aria-hidden="true"></i
+                    ></a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-lg-4 col-md-12 col-sm-12">
+              <div class="footer-link">
+                <h4>Information</h4>
+                <ul>
+                  <li><a href="#">About Us</a></li>
+                  <li><a href="#">Customer Service</a></li>
+                  <li><a href="#">Our Sitemap</a></li>
+                  <li><a href="#">Terms &amp; Conditions</a></li>
+                  <li><a href="#">Privacy Policy</a></li>
+                  <li><a href="#">Delivery Information</a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-lg-4 col-md-12 col-sm-12">
+              <div class="footer-link-contact">
+                <h4>Contact Us</h4>
+                <ul>
+                  <li>
+                    <p>
+                      <i class="fas fa-map-marker-alt"></i>Address: Michael I.
+                      Days 3756 <br />Preston Street Wichita,<br />
+                      KS 67213
+                    </p>
+                  </li>
+                  <li>
+                    <p>
+                      <i class="fas fa-phone-square"></i>Phone:
+                      <a href="tel:+1-888705770">+1-888 705 770</a>
+                    </p>
+                  </li>
+                  <li>
+                    <p>
+                      <i class="fas fa-envelope"></i>Email:
+                      <a href="mailto:contactinfo@gmail.com"
+                        >contactinfo@gmail.com</a
+                      >
+                    </p>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <!-- End Footer  -->
+
+    <!-- Start copyright  -->
+    <div class="footer-copyright">
+      <p class="footer-company">
+        All Rights Reserved. &copy; 2018 <a href="#">ThewayShop</a> Design By :
+        <a href="https://html.design/">html design</a>
+      </p>
+    </div>
+    <!-- End copyright  -->
+
+    <a href="#" id="back-to-top" title="Back to top" style="display: none"
+      >&uarr;</a
+    >
+
+    <!-- ALL JS FILES -->
+    <script src="../static/js/jquery-3.2.1.min.js"></script>
+    <script src="../static/js/popper.min.js"></script>
+    <script src="../static/js/bootstrap.min.js"></script>
+    <!-- ALL PLUGINS -->
+    <script src="../static/js/jquery.superslides.min.js"></script>
+    <script src="../static/js/bootstrap-select.js"></script>
+    <script src="../static/js/inewsticker.js"></script>
+    <script src="../static/js/bootsnav.js."></script>
+    <script src="../static/js/images-loded.min.js"></script>
+    <script src="../static/js/isotope.min.js"></script>
+    <script src="../static/js/owl.carousel.min.js"></script>
+    <script src="../static/js/baguetteBox.min.js"></script>
+    <script src="../static/js/form-validator.min.js"></script>
+    <script src="../static/js/contact-form-script.js"></script>
+    <script src="../static/js/custom.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const shippingOptions = document.querySelectorAll('input[name="shipping-option"]');
+        const shippingCostElement = document.querySelector('#shippingCost');
+    
+        shippingOptions.forEach(function (option) {
+          option.addEventListener("change", function () {
+            if (this.id === "shippingOption1") {
+              shippingCostElement.textContent = '0.0€';
+            } else if (this.id === "shippingOption2") {
+              shippingCostElement.textContent = '4.99€';
+            } else if (this.id === "shippingOption3") {
+              shippingCostElement.textContent = '10.00€';
+            }
+          });
+        });
+      });
+    </script>
+    
+  </body>
+</html>

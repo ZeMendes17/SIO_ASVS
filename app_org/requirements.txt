@@ -1,0 +1,10 @@
+flask
+Flask-Login
+marshmallow-sqlalchemy
+marshmallow
+Flask-SQLAlchemy
+flask-marshmallow
+flask_wtf
+SQLAlchemy
+click
+Werkzeug==2.3.0
