@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ -d "../instance" ]; then
-  rm -r "../instance/db_sec.sqlite"
+  rm -r "../instance/db_org.sqlite"
 fi
 
 export FLASK_APP=__init__.py
