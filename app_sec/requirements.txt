@@ -1,5 +1,6 @@
 flask
 Flask-Login
+flask_login
 marshmallow-sqlalchemy
 marshmallow
 Flask-SQLAlchemy

@@ -32,11 +32,6 @@
         <link rel="stylesheet" href="../static/css/responsive.css" />
         <!-- Custom CSS -->
         <link rel="stylesheet" href="../static/css/custom.css" />
-    
-        <!--[if lt IE 9]>
-          <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-          <script src="https://oss.maxcdn.com/libs/respond.../static/js/1.4.2/respond.min.js"></script>
-        <![endif]-->
       </head>
 
     <body>
@@ -95,6 +90,17 @@
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <h1>New User!</title>
                     
+                      {% with messages = get_flashed_messages() %}
+                      {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-danger" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                      {% endif %}
+                    {% endwith %}
+                      
+                    
                     <h2></h2>Name:<br>
                     <input type="text" name='name'><br>
                     Email:<br>
@@ -118,15 +124,6 @@
                     Profile Picture:<br>
                     <input type="file" id="image" name="image" class="hidden"><br><br>
                     <input type="submit" style="width: 100%; background-color:#162442; color:white" value="Sign In">
-                    {% with messages = get_flashed_messages() %}
-                      {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-danger" role="alert">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                      {% endif %}
-                    {% endwith %}
                 </form>
             </div>
             <br>
@@ -153,6 +150,6 @@
         <script src="../static/js/baguetteBox.min.js"></script>
         <script src="../static/js/form-validator.min.js"></script>
         <script src="../static/js/contact-form-script.js"></script>
-        <script src="../static/js/custom.js"></script>
+        <!-- <script src="../static/js/custom.js"></script> -->
     </body>
 </html>
