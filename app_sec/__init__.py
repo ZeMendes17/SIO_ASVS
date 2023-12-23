@@ -32,6 +32,7 @@ def create_app():
         static_folder="static",
         static_url_path="/static",
     )
+
     app.config["SECRET_KEY"] = "teste"
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db_sec.sqlite"
 

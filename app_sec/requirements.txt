@@ -9,3 +9,4 @@ flask_wtf
 SQLAlchemy
 click
 Werkzeug==2.3.0
+requests

@@ -1,5 +1,12 @@
 from sqlalchemy.exc import IntegrityError
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import (
+    Blueprint,
+    render_template,
+    redirect,
+    url_for,
+    request,
+    flash,
+)
 from flask_login import login_user
 from .models import User, Cart
 from . import db
@@ -7,6 +14,8 @@ import os
 from werkzeug.security import generate_password_hash
 from sqlalchemy import text
 import re
+import requests
+import hashlib
 
 register = Blueprint("register", __name__)
 
@@ -28,21 +37,26 @@ def form_signin():
     security_question = (
         request.form["security_question"] + "-" + request.form["security_answer"]
     )
+    recaptcha_response = request.form["g-recaptcha-response"]
 
-    if len(key) < 8:
-        flash("A senha deve ter pelo menos 8 caracteres")
+    recaptcha_request = requests.post(
+        "https://recaptchaenterprise.googleapis.com/v1/projects/deti-store-1703363018508/assessments?key=AIzaSyDHxOKFmFzw4ijJ-pUmTDRLFLvrnJtOxzw",
+        json={
+            "event": {
+                "token": recaptcha_response,
+                "expectedAction": "register",
+                "siteKey": "6LeFQDkpAAAAABKdp4pinNyxhov9pQeL493lwh1_",
+            }
+        },
+        headers={"Content-Type": "application/json"},
+    ).json()
+
+    if not recaptcha_request["tokenProperties"]["valid"]:
+        flash("Recaptcha inválido!", category="danger")
         return redirect(url_for("register.regist"))
-    elif not any(char.isdigit() for char in key):
-        flash("A senha deve ter pelo menos um número")
-        return redirect(url_for("register.regist"))
-    elif not any(char.isupper() for char in key):
-        flash("A senha deve ter pelo menos uma letra maiúscula")
-        return redirect(url_for("register.regist"))
-    elif not any(char.islower() for char in key):
-        flash("A senha deve ter pelo menos uma letra minúscula")
-        return redirect(url_for("register.regist"))
-    elif not any(char in "~`! @#$%^&*()_-+={[}]|\:;\"'<,>.?/" for char in key):
-        flash("A senha deve ter pelo menos um caractere especial")
+
+    processed_key = re.sub(" +", " ", key)
+    if not is_valid_password(processed_key):
         return redirect(url_for("register.regist"))
 
     if key != conf_key:
@@ -114,3 +128,39 @@ def form_signin():
         db.session.rollback()
         flash("Erro ao criar usuário ou carrinho!", "danger")
         return redirect(url_for("register.regist"))
+
+
+def is_valid_password(password):
+    # Check if the password is breached
+    if check_breached_password(password):
+        flash("A senha foi comprometida, tente outra")
+        return False
+    # Ensure password length is within the allowed range
+    elif len(password) < 12:
+        flash("A senha deve ter pelo menos 12 caracteres (espaços não incluídos)")
+        return False
+    elif len(password) > 128:
+        flash("A senha deve ter no máximo 128 caracteres (espaços não incluídos)")
+        return False
+    # Check if all characters in the password are printable Unicode characters
+    elif not all(c.isprintable() for c in password):
+        flash("A senha deve conter apenas caracteres Unicode imprimíveis")
+        return False
+
+    return True
+
+
+def check_breached_password(password):
+    # Hash the password using SHA-1
+    sha1_hash = hashlib.sha1(password.encode("utf-8")).hexdigest().upper()
+
+    # Send the first 5 characters of the hashed password to the HIBP API
+    api_url = f"https://api.pwnedpasswords.com/range/{sha1_hash[:5]}"
+    response = requests.get(api_url)
+
+    if response.status_code == 200:
+        # Check if the remaining part of the hashed password appears in the response
+        tail = sha1_hash[5:]
+        if tail in response.text:
+            return True  # Password is breached
+    return False  # Password is not breached
