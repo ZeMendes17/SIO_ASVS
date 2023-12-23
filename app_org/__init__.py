@@ -33,7 +33,7 @@ def create_app():
         static_url_path="/static",
     )
     app.config["SECRET_KEY"] = "teste"
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db_sec.sqlite"
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db_org.sqlite"
 
     db.init_app(app)
     csrf.init_app(app)
