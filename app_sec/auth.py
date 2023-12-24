@@ -35,7 +35,7 @@ def login():
             # Verify OTP
             if not totp.verify(otp):
                 flash("Invalid Verification Code", category="danger")
-                return render_template("login.html")
+                return redirect(url_for("auth.login"))
             else:
                 # Log in the user
                 login_user(user)
