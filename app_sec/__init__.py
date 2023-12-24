@@ -3,6 +3,8 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 from flask_wtf.csrf import CSRFProtect
+import smtplib
+
 
 db = SQLAlchemy()
 csrf = CSRFProtect()
@@ -35,6 +37,9 @@ def create_app():
 
     app.config["SECRET_KEY"] = "teste"
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db_sec.sqlite"
+    app.config["EMAIL_SERVER"] = smtplib.SMTP("smtp-relay.brevo.com", 587)
+    app.config["EMAIL_SERVER"].starttls()
+    app.config["EMAIL_SERVER"].login("detiStore@outlook.com", "YkLtKg9j3CmVcWUB")
 
     db.init_app(app)
     csrf.init_app(app)

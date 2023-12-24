@@ -68,7 +68,6 @@ def form_signin():
     if not re.match(phone_pattern, phone):
         flash("Número de telefone inválido!", category="danger")
         return redirect(url_for("register.regist"))
-    user.phone = phone
 
     # Verifique se a imagem é válida
     if profile_picture:
