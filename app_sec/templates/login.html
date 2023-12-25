@@ -103,6 +103,29 @@
             border-radius: 5px;
             background-color: #eee; /* Cor padrão da barra de progresso */
           }
+          .google-login {
+            margin-top: 20px;
+            text-align: center;
+          }
+
+          #google-login-button {
+            background-color: #fff;
+            color: #333;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            margin-top: 10px;
+            display: inline-block; /* para alinhar o botão ao centro */
+          }
+
+          #google-login-button img {
+            width: 20px; /* ajuste conforme necessário */
+            margin-right: 10px; /* espaço entre a imagem e o texto */
+          }
+
         </style>
         
       </head>
@@ -184,6 +207,9 @@
                       style="width: 100%; background-color:#162442; color:white">
                     Login
                   </button>
+                  <div class="google-login">
+                    <a id="google-login-button" href="/login_google"> <img src="../static/images/google_logo.png" alt="google logo" style="width: 10%;">Login with Google</a>
+                  </div>
                 </form>
             </div>
             
