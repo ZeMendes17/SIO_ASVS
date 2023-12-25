@@ -84,8 +84,9 @@ def form_signin():
                     name=nome,
                     email=email,
                     phone=phone,
-                    image=profile_picture.filename,
+                    image="../static/images/" + profile_picture.filename,
                     security_question=security_question,
+                    google_account=False,
                 )
             except:
                 flash("Erro ao fazer upload da imagem!", category="danger")
@@ -104,6 +105,7 @@ def form_signin():
             email=email,
             phone=phone,
             security_question=security_question,
+            google_account=False,
         )
 
     try:

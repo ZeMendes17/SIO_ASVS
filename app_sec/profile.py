@@ -7,6 +7,8 @@ from . import db
 import os
 import re
 from sqlalchemy.exc import IntegrityError
+import requests
+import hashlib
 
 profile = Blueprint("profile", __name__)
 
@@ -54,6 +56,10 @@ def changeProfile():
 @profile.route("/edit_profile", methods=["POST"])
 @login_required
 def changeProfileForm():
+    if current_user.google_account:
+        flash("Não é possível alterar o perfil de uma conta Google!")
+        return redirect(url_for("profile.changeProfile", id=current_user.id))
+
     user = User.query.filter_by(id=current_user.id).first()
     name = request.form.get("name")
     username = request.form.get("username")
@@ -98,38 +104,30 @@ def changeProfileForm():
         user.phone = phone
 
     if image:
-        if image.filename.endswith(".png") or image.filename.endswith(".jpeg"):
+        if (
+            image.filename.endswith(".png")
+            or image.filename.endswith(".jpeg")
+            or image.filename.endswith(".jpg")
+        ):
             try:
-                user.image = image.filename
-                image.save(os.path.join("app_sec/static/images", image.filename))
+                user.image = "../static/images/" + image.filename
+                image.save(os.path.join("static/images", image.filename))
             except:
                 flash("Erro ao fazer upload da imagem!", category="danger")
+                return redirect(url_for("profile.changeProfile"))
         else:
             flash(
-                "Por favor insira uma imagem com extensão .png ou .jpeg",
+                "Por favor insira uma imagem com extensão .png ou .jpeg ou .jpg",
                 category="danger",
             )
             return redirect(url_for("profile.changeProfile"))
 
     if newPassword:
         if newPassword == confirmNewPassword:
-            if len(newPassword) < 8:
-                flash("A senha deve ter pelo menos 8 caracteres")
+            processed_key = re.sub(" +", " ", newPassword)
+            if not is_valid_password(processed_key):
                 return redirect(url_for("profile.changeProfile"))
-            elif not any(char.isdigit() for char in newPassword):
-                flash("A senha deve ter pelo menos um número")
-                return redirect(url_for("profile.changeProfile"))
-            elif not any(char.isupper() for char in newPassword):
-                flash("A senha deve ter pelo menos uma letra maiúscula")
-                return redirect(url_for("profile.changeProfile"))
-            elif not any(char.islower() for char in newPassword):
-                flash("A senha deve ter pelo menos uma letra minúscula")
-                return redirect(url_for("profile.changeProfile"))
-            elif not any(
-                char in "~`! @#$%^&*()_-+={[}]|\:;\"'<,>.?/" for char in newPassword
-            ):
-                flash("A senha deve ter pelo menos um caractere especial")
-                return redirect(url_for("profile.changeProfile"))
+
             user.password = generate_password_hash(newPassword)
         else:
             flash("Passwords novas não coincidem!", category="danger")
@@ -145,3 +143,39 @@ def changeProfileForm():
     flash("Perfil atualizado com sucesso!", category="success")
 
     return redirect(url_for("profile.changeProfile", id=user.id))
+
+
+def is_valid_password(password):
+    # Check if the password is breached
+    if check_breached_password(password):
+        flash("A senha foi comprometida, tente outra")
+        return False
+    # Ensure password length is within the allowed range
+    elif len(password) < 12:
+        flash("A senha deve ter pelo menos 12 caracteres (espaços não incluídos)")
+        return False
+    elif len(password) > 128:
+        flash("A senha deve ter no máximo 128 caracteres (espaços não incluídos)")
+        return False
+    # Check if all characters in the password are printable Unicode characters
+    elif not all(c.isprintable() for c in password):
+        flash("A senha deve conter apenas caracteres Unicode imprimíveis")
+        return False
+
+    return True
+
+
+def check_breached_password(password):
+    # Hash the password using SHA-1
+    sha1_hash = hashlib.sha1(password.encode("utf-8")).hexdigest().upper()
+
+    # Send the first 5 characters of the hashed password to the HIBP API
+    api_url = f"https://api.pwnedpasswords.com/range/{sha1_hash[:5]}"
+    response = requests.get(api_url)
+
+    if response.status_code == 200:
+        # Check if the remaining part of the hashed password appears in the response
+        tail = sha1_hash[5:]
+        if tail in response.text:
+            return True  # Password is breached
+    return False  # Password is not breached

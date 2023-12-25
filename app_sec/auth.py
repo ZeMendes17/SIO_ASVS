@@ -8,7 +8,7 @@ from flask import (
     current_app,
 )
 from flask_login import login_user, logout_user, login_required, current_user
-from .models import User
+from .models import Cart, User
 from sqlalchemy import text
 from . import db
 from werkzeug.security import check_password_hash
@@ -102,3 +102,50 @@ def send_otp_via_email(email):
 
     # Sending email
     email_server.sendmail("detiStore@outlook.com", [email], message)
+
+
+@auth.route("/login_google")
+def login_google():
+    google = current_app.config["oauth"].create_client("google")
+    redirect_uri = url_for("auth.authorize_google", _external=True)
+    return google.authorize_redirect(redirect_uri)
+
+
+@auth.route("/authorize_google")
+def authorize_google():
+    google = current_app.config["oauth"].create_client("google")
+    token = google.authorize_access_token()
+    user_info = google.get("https://www.googleapis.com/oauth2/v3/userinfo").json()
+
+    email = user_info["email"]
+    username = email.split("@")[0]
+    picture = user_info["picture"]
+    name = user_info["name"]
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        new_user = User(
+            username=username,
+            email=email,
+            image=picture,
+            name=name,
+            google_account=True,
+        )
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+
+            new_cart = Cart(customer_id=new_user.id)
+            db.session.add(new_cart)
+            db.session.commit()
+
+            login_user(new_user)
+            flash("Conta criada com sucesso! Pode completar os dados que faltam")
+            return redirect(url_for("profile.changeProfile"))
+        except Exception as e:
+            db.session.rollback()
+            flash("Erro ao criar usuário ou carrinho!")
+            return redirect(url_for("auth.login"))
+
+    login_user(user)
+    return redirect(url_for("main.index"))

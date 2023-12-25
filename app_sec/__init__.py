@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 from flask_wtf.csrf import CSRFProtect
 import smtplib
+from authlib.integrations.flask_client import OAuth
 
 
 db = SQLAlchemy()
@@ -35,11 +36,27 @@ def create_app():
         static_url_path="/static",
     )
 
+    oauth = OAuth(app)
+    google = oauth.register(
+        name="google",
+        client_id="759976036830-vtejjnoe0me15j6i365sgad4gk3pcs1e.apps.googleusercontent.com",
+        client_secret="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",
+        authorize_url="https://accounts.google.com/o/oauth2/auth",
+        authorize_params=None,
+        access_token_url="https://accounts.google.com/o/oauth2/token",
+        access_token_params=None,
+        refresh_token_url=None,
+        redirect_uri=None,
+        client_kwargs={"scope": "openid profile email"},
+        jwks_uri="https://www.googleapis.com/oauth2/v3/certs",
+    )
     app.config["SECRET_KEY"] = "teste"
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db_sec.sqlite"
     app.config["EMAIL_SERVER"] = smtplib.SMTP("smtp-relay.brevo.com", 587)
     app.config["EMAIL_SERVER"].starttls()
     app.config["EMAIL_SERVER"].login("detiStore@outlook.com", "YkLtKg9j3CmVcWUB")
+    app.config["oauth"] = oauth
+    app.config["google"] = google
 
     db.init_app(app)
     csrf.init_app(app)

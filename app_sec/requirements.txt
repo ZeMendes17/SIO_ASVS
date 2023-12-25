@@ -11,4 +11,4 @@ click
 Werkzeug==2.3.0
 requests
 pyotp
-smtplib
+authlib
