@@ -1,3 +1,4 @@
+import datetime
 from sqlalchemy.exc import IntegrityError
 from flask import (
     Blueprint,
@@ -6,6 +7,7 @@ from flask import (
     url_for,
     request,
     flash,
+    current_app,
 )
 from flask_login import login_user
 from .models import User, Cart
@@ -16,6 +18,10 @@ from sqlalchemy import text
 import re
 import requests
 import hashlib
+import uuid
+import logging
+
+logger = logging.getLogger(__name__)
 
 register = Blueprint("register", __name__)
 
@@ -27,108 +33,113 @@ def regist():
 
 @register.route("/form_signin", methods=["POST"])
 def form_signin():
-    nome = request.form["name"]
-    email = request.form["email"]
-    phone = request.form["phone"]
-    user = request.form["username"]
-    key = request.form["password"]
-    conf_key = request.form["confirm_password"]
-    profile_picture = request.files.get("image")
-    security_question = (
-        request.form["security_question"] + "-" + request.form["security_answer"]
-    )
-    recaptcha_response = request.form["g-recaptcha-response"]
+    try:
+        nome = request.form["name"]
+        email = request.form["email"]
+        phone = request.form["phone"]
+        user = request.form["username"]
+        key = request.form["password"]
+        conf_key = request.form["confirm_password"]
+        profile_picture = request.files.get("image")
+        security_question = (
+            request.form["security_question"] + "-" + request.form["security_answer"]
+        )
+        recaptcha_response = request.form["g-recaptcha-response"]
 
-    recaptcha_request = requests.post(
-        "https://recaptchaenterprise.googleapis.com/v1/projects/deti-store-1703363018508/assessments?key=AIzaSyDHxOKFmFzw4ijJ-pUmTDRLFLvrnJtOxzw",
-        json={
-            "event": {
-                "token": recaptcha_response,
-                "expectedAction": "register",
-                "siteKey": "6LeFQDkpAAAAABKdp4pinNyxhov9pQeL493lwh1_",
-            }
-        },
-        headers={"Content-Type": "application/json"},
-    ).json()
+        recaptcha_request = requests.post(
+            "https://recaptchaenterprise.googleapis.com/v1/projects/deti-store-1703363018508/assessments?key=AIzaSyDHxOKFmFzw4ijJ-pUmTDRLFLvrnJtOxzw",
+            json={
+                "event": {
+                    "token": recaptcha_response,
+                    "expectedAction": "register",
+                    "siteKey": "6LeFQDkpAAAAABKdp4pinNyxhov9pQeL493lwh1_",
+                }
+            },
+            headers={"Content-Type": "application/json"},
+        ).json()
 
-    if not recaptcha_request["tokenProperties"]["valid"]:
-        flash("Recaptcha inválido!", category="danger")
-        return redirect(url_for("register.regist"))
+        if not recaptcha_request["tokenProperties"]["valid"]:
+            flash("Recaptcha inválido!", category="danger")
+            return redirect(url_for("register.regist"))
 
-    processed_key = re.sub(" +", " ", key)
-    if not is_valid_password(processed_key):
-        return redirect(url_for("register.regist"))
+        processed_key = re.sub(" +", " ", key)
+        if not is_valid_password(processed_key):
+            return redirect(url_for("register.regist"))
 
-    if key != conf_key:
-        flash("Passwords não coincidem!", "error")
-        return redirect(url_for("register.regist"))
+        if key != conf_key:
+            flash("Passwords não coincidem!", "error")
+            return redirect(url_for("register.regist"))
 
-    # Verifique se o nome de usuário já existe
-    phone_pattern = r"^\d{9}$|^\d{3}[-\s]?\d{2}[-\s]?\d{4}$"
-    if not re.match(phone_pattern, phone):
-        flash("Número de telefone inválido!", category="danger")
-        return redirect(url_for("register.regist"))
+        # Verifique se o nome de usuário já existe
+        phone_pattern = r"^\d{9}$|^\d{3}[-\s]?\d{2}[-\s]?\d{4}$"
+        if not re.match(phone_pattern, phone):
+            flash("Número de telefone inválido!", category="danger")
+            return redirect(url_for("register.regist"))
 
-    # Verifique se a imagem é válida
-    if profile_picture:
-        if profile_picture.filename.endswith(
-            ".png"
-        ) or profile_picture.filename.endswith(".jpeg"):
-            try:
-                profile_picture.save(
-                    os.path.join("app_sec/static/images", profile_picture.filename)
+        # Verifique se a imagem é válida
+        if profile_picture:
+            if profile_picture.filename.endswith(
+                ".png"
+            ) or profile_picture.filename.endswith(".jpeg"):
+                try:
+                    profile_picture.save(
+                        os.path.join("app_sec/static/images", profile_picture.filename)
+                    )
+                    new_user = User(
+                        username=user,
+                        password=generate_password_hash(key),
+                        name=nome,
+                        email=email,
+                        phone=phone,
+                        image="../static/images/" + profile_picture.filename,
+                        security_question=security_question,
+                        google_account=False,
+                    )
+                except:
+                    flash("Erro ao fazer upload da imagem!", category="danger")
+                    return redirect(url_for("register.regist"))
+            else:
+                flash(
+                    "Por favor insira uma imagem com extensão .png ou .jpeg",
+                    category="danger",
                 )
-                new_user = User(
-                    username=user,
-                    password=generate_password_hash(key),
-                    name=nome,
-                    email=email,
-                    phone=phone,
-                    image="../static/images/" + profile_picture.filename,
-                    security_question=security_question,
-                    google_account=False,
-                )
-            except:
-                flash("Erro ao fazer upload da imagem!", category="danger")
                 return redirect(url_for("register.regist"))
         else:
-            flash(
-                "Por favor insira uma imagem com extensão .png ou .jpeg",
-                category="danger",
+            new_user = User(
+                username=user,
+                password=generate_password_hash(key),
+                name=nome,
+                email=email,
+                phone=phone,
+                security_question=security_question,
+                google_account=False,
             )
+
+        try:
+            # Adicione o usuário ao banco de dados
+            db.session.add(new_user)
+            db.session.commit()
+
+            new_cart = Cart(customer_id=new_user.id)
+            db.session.add(new_cart)
+            db.session.commit()
+
+            login_user(new_user)
+            return redirect(url_for("main.index"))
+
+        except IntegrityError:
+            db.session.rollback()
+            flash("Username or email already exists!", "error")
             return redirect(url_for("register.regist"))
-    else:
-        new_user = User(
-            username=user,
-            password=generate_password_hash(key),
-            name=nome,
-            email=email,
-            phone=phone,
-            security_question=security_question,
-            google_account=False,
-        )
 
-    try:
-        # Adicione o usuário ao banco de dados
-        db.session.add(new_user)
-        db.session.commit()
-
-        new_cart = Cart(customer_id=new_user.id)
-        db.session.add(new_cart)
-        db.session.commit()
-
-        login_user(new_user)
-        return redirect(url_for("main.index"))
-
-    except IntegrityError:
-        db.session.rollback()
-        flash("Username or email already exists!", "error")
-        return redirect(url_for("register.regist"))
+        except Exception as e:
+            db.session.rollback()
+            flash("Erro ao criar usuário ou carrinho!", "danger")
+            return redirect(url_for("register.regist"))
 
     except Exception as e:
-        db.session.rollback()
-        flash("Erro ao criar usuário ou carrinho!", "danger")
-        return redirect(url_for("register.regist"))
+        # Handle unexpected errors
+        handle_error(e)
 
 
 def is_valid_password(password):
@@ -165,3 +176,20 @@ def check_breached_password(password):
         if tail in response.text:
             return True  # Password is breached
     return False  # Password is not breached
+
+
+def handle_error(e):
+    error_id = generate_unique_error_id()
+    timestamp = datetime.utcnow().isoformat()
+    logger.error("Error ID: %s\nTimestamp: %s\n%s\n", error_id, timestamp, str(e))
+
+    flash(
+        "Ocorreu um erro inesperado. Por favor, entre em contato com o suporte com o ID do erro: "
+        + error_id,
+        category="danger",
+    )
+    return redirect(url_for("main.index"))
+
+
+def generate_unique_error_id():
+    return str(uuid.uuid4())
