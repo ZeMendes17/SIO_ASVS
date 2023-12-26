@@ -17,16 +17,19 @@ wishlist_product = db.Table(
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    password = db.Column(db.String(100))
+    password = db.Column(db.String(100), nullable=True)
     isAdmin = db.Column(db.Boolean, default=False)
     username = db.Column(db.String(100), unique=True)
     name = db.Column(db.String(100))
     email = db.Column(db.String(100), unique=True)
-    phone = db.Column(db.String(100))
-    image = db.Column(db.String(20), nullable=False, default="default.jpg")
-    security_question = db.Column(db.String(100))
+    phone = db.Column(db.String(100), nullable=True)
+    image = db.Column(
+        db.String(20), nullable=False, default="../static/images/default.jpg"
+    )
+    security_question = db.Column(db.String(100), nullable=True)
     cart = db.relationship("Cart", backref="user")
     wishlist = db.relationship("Wishlist", backref="user")
+    google_account = db.Column(db.Boolean, default=False)
 
 
 class Cart(db.Model):

@@ -36,6 +36,7 @@ def generate_users():
             "email": "admin@gmail.com",
             "phone": "123456789",
             "security_question": "question1-Orange",
+            "google_account": False,
         },
         {
             "username": "user",
@@ -45,6 +46,7 @@ def generate_users():
             "email": "user@gmail.com",
             "phone": "987654321",
             "security_question": "question1-Black",
+            "google_account": False,
         },
     ]
     try:

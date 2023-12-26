@@ -1,0 +1,11 @@
+Password Security Credentials - 2.1.5 - Verify users can change their password.
+
+Password Security Credentials - 2.1.6 - Verify that password change functionality requires the user's current and new password.
+
+Password Security Credentials - 2.1.11 - Verify that "paste" functionality, browser password helpers, and external password managers are permitted.
+
+Credentials Storage Credentials - 2.4.1 - Verify that passwords are stored in a form that is resistant to offline attacks. Passwords SHALL be salted and hashed using an approved one-way key derivation or password hashing function. Key derivation and password hashing functions take a password, a salt, and a cost factor as inputs when generating a password hash. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+
+Credential Recovery Requirements - 2.5.2 - Verify password hints or knowledge-based authentication (so-called "secret questions") are not present.
+
+Credential Recovery Requirements - 2.5.4 - Verify shared or default accounts are not present (e.g. "root", "admin", or "sa").

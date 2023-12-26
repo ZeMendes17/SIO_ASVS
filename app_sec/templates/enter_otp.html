@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- Mobile Metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Enter OTP</title>
+
+    <!-- Site Icons -->
+    <link
+      rel="shortcut icon"
+      href="../static/images/favicon.ico"
+      type="image/x-icon"
+    />
+    <link rel="apple-touch-icon" href="../static/images/apple-touch-icon.png" />
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css" />
+    <!-- Site CSS -->
+    <link rel="stylesheet" href="../static/css/style.css" />
+    <!-- Responsive CSS -->
+    <link rel="stylesheet" href="../static/css/responsive.css" />
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../static/css/custom.css" />
+
+    <script src="https://www.google.com/recaptcha/enterprise.js?render=6LeFQDkpAAAAABKdp4pinNyxhov9pQeL493lwh1_"></script>
+    <style>
+      body {
+        background-color: #f8f9fa;
+        font-family: "Arial", sans-serif;
+      }
+
+      form {
+        background-color: #ffffff;
+        max-width: 400px;
+        margin: 50px auto;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h2 {
+        text-align: center;
+        color: #162442;
+      }
+
+      label {
+        display: block;
+        margin-top: 15px;
+        color: #333;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        margin-bottom: 15px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+
+      button {
+        background-color: #162442;
+        color: #ffffff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+      }
+
+      button:hover {
+        background-color: #1c2a4b;
+      }
+
+      .alert {
+        margin-top: 15px;
+        padding: 10px;
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <form action="/login" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <h2>Enter Verification Code</h2>
+      <label for="otp">Code:</label>
+      <input type="text" name="otp" required />
+      <input type="hidden" name="username" value="{{ username }}" />
+      <input
+        type="hidden"
+        name="g-recaptcha-response"
+        value="{{ recaptcha_response }}"
+      />
+      <button type="submit">Submit</button>
+      {% with messages = get_flashed_messages() %} {% if messages %} {% for
+      message in messages %}
+      <div class="alert alert-danger" role="alert">{{ message }}</div>
+      {% endfor %} {% endif %} {% endwith %}
+    </form>
+  </body>
+</html>
