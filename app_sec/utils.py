@@ -3,6 +3,7 @@ from . import db
 from .models import User, Product, Comment, Cart, Wishlist, Order, OrderProduct
 from sqlalchemy import text
 from werkzeug.security import generate_password_hash
+import encryption as E
 
 utl = Blueprint("util", __name__)
 
@@ -27,14 +28,32 @@ def generate_users():
     query = text("DELETE FROM user")
     db.session.execute(query)
     db.session.commit()
+    # generate key and encrypt the email and phone of the users
+    # admin - email
+    key = E.generate_key()
+    E.store_key(key, "ADMIN_EMAIL_KEY")
+    admin_email = E.aes_encrypt("admin@gmail.com", key)
+    # admin - phone
+    key = E.generate_key()
+    E.store_key(key, "ADMIN_PHONE_KEY")
+    admin_phone = E.aes_encrypt("123456789", key)
+    # user - email
+    key = E.generate_key()
+    E.store_key(key, "USER_EMAIL_KEY")
+    user_email = E.aes_encrypt("user@gmail.com", key)
+    # user - phone
+    key = E.generate_key()
+    E.store_key(key, "USER_PHONE_KEY")
+    user_phone = E.aes_encrypt("987654321", key)
+
     users = [
         {
             "username": "admin",
             "password": generate_password_hash("admin1234"),
             "isAdmin": True,
             "name": "Admin",
-            "email": "admin@gmail.com",
-            "phone": "123456789",
+            "email": admin_email,
+            "phone": admin_phone,
             "security_question": "question1-Orange",
             "google_account": False,
         },
@@ -43,8 +62,8 @@ def generate_users():
             "password": generate_password_hash("user1234"),
             "isAdmin": False,
             "name": "User",
-            "email": "user@gmail.com",
-            "phone": "987654321",
+            "email": user_email,
+            "phone": user_phone,
             "security_question": "question1-Black",
             "google_account": False,
         },
