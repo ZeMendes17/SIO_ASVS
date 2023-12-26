@@ -12,3 +12,4 @@ Werkzeug==2.3.0
 requests
 pyotp
 authlib
+cryptography==41.0.7
