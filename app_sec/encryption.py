@@ -40,6 +40,16 @@ def generate_key():
 
 def store_key(key, name):
     os.environ[name] = key.hex()
+    # make it persistent
+    with open('.env', 'a') as f:
+        f.write(f'{name}={key.hex()}\n')
 
 def get_key(name):
-    return bytes.fromhex(os.environ[name])
+    if name in os.environ:
+        return bytes.fromhex(os.environ[name])
+    else:
+        # read from .env file
+        with open('.env', 'r') as f:
+            for line in f:
+                if line.startswith(name):
+                    return bytes.fromhex(line.split('=')[1])
