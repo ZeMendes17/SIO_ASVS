@@ -14,6 +14,7 @@ from . import db
 from werkzeug.security import check_password_hash
 import requests
 import pyotp
+import encryption as E
 
 auth = Blueprint("auth", __name__)
 
@@ -74,7 +75,11 @@ def form_login():
         return redirect(url_for("auth.login"))
 
     # Send OTP via email
-    send_otp_via_email(user.email)
+    # get the user's email key
+    email_key = E.get_key(f"{username}_EMAIL_KEY")
+    # decrypt the user's email
+    email = E.aes_decrypt(user.email, email_key)
+    send_otp_via_email(email)
 
     return render_template("enter_otp.html", username=username)
 
@@ -122,8 +127,26 @@ def authorize_google():
     picture = user_info["picture"]
     name = user_info["name"]
 
-    user = User.query.filter_by(email=email).first()
+    user = None
+    # Check if user exists with that email
+    users = db.session.execute("SELECT * FROM users").fetchall()
+    for user in users:
+        # get the user's email key
+        email_key = E.get_key(f"{user.username}_EMAIL_KEY")
+        # decrypt the user's email
+        user_email = E.aes_decrypt(user.email, email_key)\
+
+        if user_email == email:
+            user = User.query.filter_by(username=user.username).first()
+            break
+
     if not user:
+        # create a new user
+        key = E.generate_key()
+        # store the key
+        E.store_key(key, f"{username}_EMAIL_KEY")
+        # encrypt the email
+        email = E.aes_encrypt(email, key)
         new_user = User(
             username=username,
             email=email,
