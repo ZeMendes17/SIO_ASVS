@@ -21,6 +21,7 @@ import hashlib
 from . import encryption as E
 import logging
 from datetime import datetime
+from .auth import recheck_login
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,11 @@ profile = Blueprint("profile", __name__)
 @login_required
 def perfil():
     try:
+        action = recheck_login()
+
+        if action is not None:
+            return action
+
         user = User.query.filter_by(id=current_user.id).first()
 
         # get number of items in cart
@@ -137,7 +143,6 @@ def changeProfileForm():
             # store the key
             E.store_key(key, f"{user.username}_PHONE_KEY")
             user.phone = E.aes_encrypt(phone, key)
-
 
         if image:
             if (

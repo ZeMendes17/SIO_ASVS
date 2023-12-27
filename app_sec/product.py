@@ -14,6 +14,7 @@ from .models import Comment
 from sqlalchemy import text
 from . import db
 import logging
+from .auth import recheck_login
 
 products = Blueprint("product", __name__)
 
@@ -22,6 +23,11 @@ products = Blueprint("product", __name__)
 def product(id):
     try:
         if current_user.is_authenticated:
+            action = recheck_login()
+
+            if action is not None:
+                return action
+
             query = text("SELECT * FROM product WHERE id =" + str(id))
             product = db.session.execute(query).fetchone()
 

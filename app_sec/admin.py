@@ -13,6 +13,7 @@ from sqlalchemy import text
 from . import db
 import uuid
 import logging
+from .auth import recheck_login
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,11 @@ admin = Blueprint("admin", __name__)
 @admin.route("/admin", methods=["GET", "POST"])
 def admin_page():
     try:
+        action = recheck_login()
+
+        if action is not None:
+            return action
+
         if not current_user.isAdmin:
             return render_template("404.html")
 
