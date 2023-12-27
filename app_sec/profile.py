@@ -9,6 +9,7 @@ import re
 from sqlalchemy.exc import IntegrityError
 import requests
 import hashlib
+import encryption as E
 
 profile = Blueprint("profile", __name__)
 
@@ -101,7 +102,12 @@ def changeProfileForm():
         if not re.match(phone_pattern, phone):
             flash("Número de telefone inválido!", category="danger")
             return redirect(url_for("profile.changeProfile", id=user.id))
-        user.phone = phone
+        # encrypt phone number
+        key = E.generate_key()
+        # store the key
+        E.store_key(key, f"{user.username}_PHONE_KEY")
+        user.phone = E.aes_encrypt(phone, key)
+
 
     if image:
         if (
