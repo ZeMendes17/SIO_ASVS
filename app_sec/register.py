@@ -1,3 +1,4 @@
+import uuid
 from sqlalchemy.exc import IntegrityError
 from flask import (
     Blueprint,
@@ -16,8 +17,12 @@ from sqlalchemy import text
 import re
 import requests
 import hashlib
+import logging
+from datetime import datetime
 
 register = Blueprint("register", __name__)
+
+logger = logging.getLogger(__name__)
 
 
 @register.route("/register")
@@ -130,9 +135,9 @@ def form_signin():
         return redirect(url_for("register.regist"))
 
     except Exception as e:
+        # Handle unexpected errors
         db.session.rollback()
-        flash("Erro ao criar usuário ou carrinho!", "danger")
-        return redirect(url_for("register.regist"))
+        return handle_error(e)
 
 
 def is_valid_password(password):
@@ -169,3 +174,20 @@ def check_breached_password(password):
         if tail in response.text:
             return True  # Password is breached
     return False  # Password is not breached
+
+
+def handle_error(e):
+    error_id = generate_unique_error_id()
+    timestamp = datetime.utcnow().isoformat()
+    logger.error("Error ID: %s\nTimestamp: %s\n%s\n%s", error_id, timestamp, str(e))
+
+    flash(
+        "Ocorreu um erro inesperado. Por favor, entre em contato com o suporte com o ID do erro: "
+        + error_id,
+        category="danger",
+    )
+    return redirect(url_for("register.regist"))
+
+
+def generate_unique_error_id():
+    return str(uuid.uuid4())
