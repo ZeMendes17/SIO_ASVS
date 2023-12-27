@@ -8,7 +8,7 @@ from flask import (
     flash,
 )
 from flask_login import login_user
-from .models import User, Cart
+from .models import User, Cart, Wishlist
 from . import db
 import os
 from werkzeug.security import generate_password_hash
@@ -115,6 +115,10 @@ def form_signin():
 
         new_cart = Cart(customer_id=new_user.id)
         db.session.add(new_cart)
+        db.session.commit()
+
+        new_wishlist = Wishlist(customer_id=new_user.id)
+        db.session.add(new_wishlist)
         db.session.commit()
 
         login_user(new_user)
