@@ -16,7 +16,7 @@ from sqlalchemy import text
 import re
 import requests
 import hashlib
-import encryption as E
+from . import encryption as E
 
 register = Blueprint("register", __name__)
 

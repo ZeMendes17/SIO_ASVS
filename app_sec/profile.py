@@ -9,7 +9,7 @@ import re
 from sqlalchemy.exc import IntegrityError
 import requests
 import hashlib
-import encryption as E
+from . import encryption as E
 
 profile = Blueprint("profile", __name__)
 

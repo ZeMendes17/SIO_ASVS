@@ -3,7 +3,7 @@ from . import db
 from .models import User, Product, Comment, Cart, Wishlist, Order, OrderProduct
 from sqlalchemy import text
 from werkzeug.security import generate_password_hash
-import encryption as E
+from . import encryption as E
 
 utl = Blueprint("util", __name__)
 

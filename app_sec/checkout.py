@@ -7,7 +7,7 @@ from . import db
 from datetime import date
 import string
 import random
-import encryption as E
+from . import encryption as E
 
 
 checkout = Blueprint("checkout", __name__)

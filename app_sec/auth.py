@@ -14,7 +14,7 @@ from . import db
 from werkzeug.security import check_password_hash
 import requests
 import pyotp
-import encryption as E
+from . import encryption as E
 
 auth = Blueprint("auth", __name__)
 
