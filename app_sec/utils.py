@@ -291,27 +291,27 @@ def generate_orders():
     # generate key and encrypt the tracking number, shipping address and billing address of the orders
     # order 1 - tracking number
     key = E.generate_key()
-    E.store_key(key, "ORDER1_TRACKING_NUMBER_KEY")
+    E.store_key(key, "USER1_TRACKING_NUMBER_KEY")
     o1_track = E.aes_encrypt("T5rLgPq3W7Yv", key)
     # order 1 - shipping address
     key = E.generate_key()
-    E.store_key(key, "ORDER1_SHIPPING_ADDRESS_KEY")
+    E.store_key(key, "USER1_SHIPPING_ADDRESS_KEY")
     o1_shipping_address = E.aes_encrypt("Rua do Campo Alegre, 1021, 4150-180 Porto", key)
     # order 1 - billing address
     key = E.generate_key()
-    E.store_key(key, "ORDER1_BILLING_ADDRESS_KEY")
+    E.store_key(key, "USER1_BILLING_ADDRESS_KEY")
     o1_billing_address = E.aes_encrypt("Rua do Campo Alegre, 1021, 4150-180 Porto", key)
     # order 2 - tracking number
     key = E.generate_key()
-    E.store_key(key, "ORDER2_TRACKING_NUMBER_KEY")
+    E.store_key(key, "USER2_TRACKING_NUMBER_KEY")
     o2_track = E.aes_encrypt("aR6NpHj2MzFy", key)
     # order 2 - shipping address
     key = E.generate_key()
-    E.store_key(key, "ORDER2_SHIPPING_ADDRESS_KEY")
+    E.store_key(key, "USER2_SHIPPING_ADDRESS_KEY")
     o2_shipping_address = E.aes_encrypt("Rua do Campo Alegre, 1021, 4150-180 Porto", key)
     # order 2 - billing address
     key = E.generate_key()
-    E.store_key(key, "ORDER2_BILLING_ADDRESS_KEY")
+    E.store_key(key, "USER2_BILLING_ADDRESS_KEY")
     o2_billing_address = E.aes_encrypt("Rua do Campo Alegre, 1021, 4150-180 Porto", key)
 
 

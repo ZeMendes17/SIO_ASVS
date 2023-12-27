@@ -13,6 +13,7 @@ from flask_login import login_required, current_user
 from sqlalchemy import text
 from . import db
 import logging
+from . import encryption as E
 
 logger = logging.getLogger(__name__)
 
@@ -52,11 +53,34 @@ def orders_page():
                 product_name = db.session.execute(query).fetchone()
                 product_names[order_product.product_id] = product_name[0]
 
+        disp_orders = {}
+        count = 0
+        for order in orders:
+            if order.customer_id != current_user.id:
+                continue
+            count += 1
+            disp_orders[order.id] = []
+            # get the tracking number
+            key = E.get_key(f"{current_user.username.upper()}{count}_TRACKING_NUMBER_KEY")
+            tracking_number = E.aes_decrypt(order.tracking_number, key)
+            disp_orders[order.id].append(tracking_number)
+            # same for the billing and shipping addresses
+            key = E.get_key(f"{current_user.username.upper()}{count}_BILLING_ADDRESS_KEY")
+            billing_address = E.aes_decrypt(order.billing_address, key)
+            disp_orders[order.id].append(billing_address)
+            
+            key = E.get_key(f"{current_user.username.upper()}{count}_SHIPPING_ADDRESS_KEY")
+            shipping_address = E.aes_decrypt(order.shipping_address, key)
+            disp_orders[order.id].append(shipping_address)
+
+
+
         # get product names
 
         return render_template(
             "orders.html",
             orders=orders,
+            disp_orders=disp_orders,
             all_order_products=all_order_products,
             product_names=product_names,
             final_prices=final_prices,

@@ -148,15 +148,15 @@ def form_checkout():
             # Criar um novo Order
             # encrypt the tracking number
             key = E.generate_key()
-            E.store_key(key, f"{current_user.username}_TRACKING_NUMBER_KEY")
+            E.store_key(key, f"{current_user.username.upper()}{number_of_orders+1}_TRACKING_NUMBER_KEY")
             tracking_number_enc = E.aes_encrypt(generate_tracking_number(), key)
             # encrypt the shipping address
             key = E.generate_key()
-            E.store_key(key, f"{current_user.username}_SHIPPING_ADDRESS_KEY")
+            E.store_key(key, f"{current_user.username.upper()}{number_of_orders+1}_SHIPPING_ADDRESS_KEY")
             shipping_address_enc = E.aes_encrypt(address, key)
             # encrypt the billing address
             key = E.generate_key()
-            E.store_key(key, f"{current_user.username}_BILLING_ADDRESS_KEY")
+            E.store_key(key, f"{current_user.username.upper()}{number_of_orders+1}_BILLING_ADDRESS_KEY")
             billing_address_enc = E.aes_encrypt(address2, key)
             
             new_order = Order(
