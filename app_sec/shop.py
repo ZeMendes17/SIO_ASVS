@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import uuid
 from flask import (
     Blueprint,
@@ -10,9 +10,10 @@ from flask import (
     current_app,
 )
 from sqlalchemy import text
-from flask_login import current_user, login_required
+from flask_login import current_user, login_required, logout_user
 from . import db
 import logging
+from .auth import recheck_login
 
 shops = Blueprint("shops", __name__)
 
@@ -48,6 +49,11 @@ def shop():
     try:
         if request.method == "GET":
             if current_user.is_authenticated:
+                action = recheck_login()
+
+                if action is not None:
+                    return action
+
                 search = request.args.get("search")
                 if search:
                     query = text("SELECT * FROM product WHERE name LIKE :search")

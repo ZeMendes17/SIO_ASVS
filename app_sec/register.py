@@ -17,6 +17,7 @@ from sqlalchemy import text
 import re
 import requests
 import hashlib
+from . import encryption as E
 import logging
 from datetime import datetime
 
@@ -83,12 +84,21 @@ def form_signin():
                 profile_picture.save(
                     os.path.join("app_sec/static/images", profile_picture.filename)
                 )
+                # encrypt email and phone number
+                email_key = E.generate_key()
+                phone_key = E.generate_key()
+                # store the keys
+                E.store_key(email_key, f"{user}_EMAIL_KEY")
+                E.store_key(phone_key, f"{user}_PHONE_KEY")
+                email_enc = E.aes_encrypt(email, email_key)
+                phone_enc = E.aes_encrypt(phone, phone_key)
+
                 new_user = User(
                     username=user,
                     password=generate_password_hash(key),
                     name=nome,
-                    email=email,
-                    phone=phone,
+                    email=email_enc,
+                    phone=phone_enc,
                     image="../static/images/" + profile_picture.filename,
                     security_question=security_question,
                     google_account=False,
@@ -103,12 +113,21 @@ def form_signin():
             )
             return redirect(url_for("register.regist"))
     else:
+        # encrypt email and phone number
+        email_key = E.generate_key()
+        phone_key = E.generate_key()
+        # store the keys
+        E.store_key(email_key, f"{user}_EMAIL_KEY")
+        E.store_key(phone_key, f"{user}_PHONE_KEY")
+        email_enc = E.aes_encrypt(email, email_key)
+        phone_enc = E.aes_encrypt(phone, phone_key)
+
         new_user = User(
             username=user,
             password=generate_password_hash(key),
             name=nome,
-            email=email,
-            phone=phone,
+            email=email_enc,
+            phone=phone_enc,
             security_question=security_question,
             google_account=False,
         )

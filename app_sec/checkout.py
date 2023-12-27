@@ -16,8 +16,10 @@ from . import db
 from datetime import date
 import string
 import random
+from . import encryption as E
 import uuid
 import logging
+from .auth import recheck_login
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +31,11 @@ order_id = 1
 @login_required
 def check():
     try:
+        action = recheck_login()
+
+        if action is not None:
+            return action
+
         query = text("SELECT * FROM cart WHERE customer_id =" + str(current_user.id))
         cart = db.session.execute(query).fetchone()
 
@@ -144,15 +151,38 @@ def form_checkout():
             number_of_orders = db.session.execute(query).fetchone()[0]
 
             # Criar um novo Order
+            # Criar um novo Order
+            # encrypt the tracking number
+            key = E.generate_key()
+            E.store_key(
+                key,
+                f"{current_user.username.upper()}{number_of_orders+1}_TRACKING_NUMBER_KEY",
+            )
+            tracking_number_enc = E.aes_encrypt(generate_tracking_number(), key)
+            # encrypt the shipping address
+            key = E.generate_key()
+            E.store_key(
+                key,
+                f"{current_user.username.upper()}{number_of_orders+1}_SHIPPING_ADDRESS_KEY",
+            )
+            shipping_address_enc = E.aes_encrypt(address, key)
+            # encrypt the billing address
+            key = E.generate_key()
+            E.store_key(
+                key,
+                f"{current_user.username.upper()}{number_of_orders+1}_BILLING_ADDRESS_KEY",
+            )
+            billing_address_enc = E.aes_encrypt(address2, key)
+
             new_order = Order(
                 order_number=number_of_orders + 1,
                 customer_id=current_user.id,
                 date=date.today().strftime("%d/%m/%Y"),
                 tax=3.99,
                 shipping_cost=4.99,
-                tracking_number=generate_tracking_number(),
-                shipping_address=address,
-                billing_address=address2,
+                tracking_number=tracking_number_enc,
+                shipping_address=shipping_address_enc,
+                billing_address=billing_address_enc,
             )
 
             try:

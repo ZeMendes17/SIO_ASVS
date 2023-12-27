@@ -1,10 +1,12 @@
-import datetime
+from datetime import datetime, timedelta
 import uuid
-from flask import Blueprint, render_template, flash, current_app
+from flask import Blueprint, redirect, render_template, flash, current_app, url_for
+from flask_login import current_user, login_required
 from sqlalchemy import text
 from . import db
 from flask_login import current_user
 import logging
+from .auth import recheck_login
 
 main = Blueprint("main", __name__)
 
@@ -15,6 +17,11 @@ logger = logging.getLogger(__name__)
 def index():
     try:
         if current_user.is_authenticated:
+            action = recheck_login()
+
+            if action is not None:
+                return action
+
             query = text("SELECT * FROM product")
             products = db.session.execute(query).fetchall()
 
@@ -40,11 +47,12 @@ def index():
                 "index.html", products=products, number_of_items=number_of_items
             )
         else:
+            logger.info("User is not authenticated")
+            print("User is not authenticated")
             query = text("SELECT * FROM product")
             products = db.session.execute(query).fetchall()
 
             return render_template("index.html", products=products)
-
     except Exception as e:
         # Handle unexpected errors
         handle_error(e)

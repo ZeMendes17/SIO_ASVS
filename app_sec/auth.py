@@ -14,9 +14,10 @@ from . import db
 from werkzeug.security import check_password_hash
 import requests
 import pyotp
+from . import encryption as E
 import uuid
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 auth = Blueprint("auth", __name__)
 
@@ -28,8 +29,11 @@ logger = logging.getLogger(__name__)
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
+    print("Login")
     try:
         if current_user.is_authenticated:
+            current_user.last_activity_time = datetime.utcnow()
+            db.session.commit()
             return redirect(url_for("main.index"))
         else:
             if request.method == "POST":
@@ -44,9 +48,11 @@ def login():
                     return redirect(url_for("auth.login"))
                 else:
                     # Log in the user
+                    print("User is authenticated")
                     login_user(user)
                     return redirect(url_for("main.index"))
             else:
+                print("User is not authenticated")
                 return render_template("login.html")
     except Exception as e:
         # Handle unexpected errors
@@ -84,7 +90,11 @@ def form_login():
             return redirect(url_for("auth.login"))
 
         # Send OTP via email
-        send_otp_via_email(user.email)
+        # get the user's email key
+        email_key = E.get_key(f"{username.upper()}_EMAIL_KEY")
+        # decrypt the user's email
+        email = E.aes_decrypt(user.email, email_key)
+        send_otp_via_email(email)
 
         return render_template("enter_otp.html", username=username)
     except Exception as e:
@@ -148,8 +158,26 @@ def authorize_google():
         picture = user_info["picture"]
         name = user_info["name"]
 
-        user = User.query.filter_by(email=email).first()
+        user = None
+        # Check if user exists with that email
+        users = db.session.execute(text("SELECT * FROM user")).fetchall()
+        for u in users:
+            # get the user's email key
+            email_key = E.get_key(f"{u.username.upper()}_EMAIL_KEY")
+            # decrypt the user's email
+            user_email = E.aes_decrypt(u.email, email_key)
+
+            if user_email == email:
+                user = User.query.filter_by(username=u.username).first()
+                break
+
         if not user:
+            # create a new user
+            key = E.generate_key()
+            # store the key
+            E.store_key(key, f"{username.upper()}_EMAIL_KEY")
+            # encrypt the email
+            email = E.aes_encrypt(email, key)
             new_user = User(
                 username=username,
                 email=email,
@@ -205,3 +233,26 @@ def handle_error(e):
 
 def generate_unique_error_id():
     return str(uuid.uuid4())
+
+
+@login_required
+def recheck_login():
+    # Check if re-authentication is needed based on the configured periods
+    idle_period_limit = datetime.utcnow() - timedelta(days=30)  # L1: 30 days
+    actively_used_limit = datetime.utcnow() - timedelta(hours=12)  # L2: 12 hours
+
+    if current_user.last_activity_time < idle_period_limit:
+        # Re-authenticate for idle period
+        flash("Please re-enter your password to continue.", "danger")
+
+        logout_user()
+
+        return redirect(url_for("auth.login"))
+
+    if current_user.last_activity_time < actively_used_limit:
+        # Re-authenticate for actively used period
+        flash("Please re-enter your password to continue.", "danger")
+
+        logout_user()
+
+        return redirect(url_for("auth.login"))

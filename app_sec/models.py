@@ -1,5 +1,6 @@
 from flask_login import UserMixin
 from . import db
+from datetime import datetime
 
 cart_product = db.Table(
     "cart_product",
@@ -30,6 +31,7 @@ class User(db.Model, UserMixin):
     cart = db.relationship("Cart", backref="user")
     wishlist = db.relationship("Wishlist", backref="user")
     google_account = db.Column(db.Boolean, default=False)
+    last_activity_time = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class Cart(db.Model):
