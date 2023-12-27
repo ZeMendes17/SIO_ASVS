@@ -8,7 +8,7 @@ from flask import (
     current_app,
 )
 from flask_login import login_user, logout_user, login_required, current_user
-from .models import Cart, User
+from .models import Cart, User, Wishlist
 from sqlalchemy import text
 from . import db
 from werkzeug.security import check_password_hash
@@ -165,9 +165,12 @@ def authorize_google():
                 db.session.add(new_cart)
                 db.session.commit()
 
+                new_wishlist = Wishlist(customer_id=new_user.id)
+                db.session.add(new_wishlist)
+                db.session.commit()
+
                 login_user(new_user)
-                flash("Conta criada com sucesso! Pode completar os dados que faltam")
-                return redirect(url_for("profile.changeProfile"))
+                return redirect(url_for("main.index"))
             except Exception as e:
                 db.session.rollback()
                 flash("Erro ao criar usuário ou carrinho!")
