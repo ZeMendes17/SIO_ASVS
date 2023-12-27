@@ -13,6 +13,7 @@ from sqlalchemy import text
 from . import db
 import uuid
 import logging
+from .auth import recheck_login
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,11 @@ shopping_cart = Blueprint("cart", __name__)
 @login_required
 def cart():
     try:
+        action = recheck_login()
+
+        if action is not None:
+            return action
+
         query = text("SELECT * FROM cart WHERE customer_id =" + str(current_user.id))
         cart = db.session.execute(query).fetchone()
 

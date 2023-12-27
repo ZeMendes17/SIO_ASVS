@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import uuid
 from flask import (
     Blueprint,
@@ -14,6 +14,7 @@ from sqlalchemy import text
 from . import db
 import logging
 from . import encryption as E
+from .auth import recheck_login
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,11 @@ orders = Blueprint("orders", __name__)
 @login_required
 def orders_page():
     try:
+        action = recheck_login()
+
+        if action is not None:
+            return action
+
         query = text(
             "SELECT * FROM [order] WHERE customer_id ="
             + str(current_user.id)
@@ -61,19 +67,23 @@ def orders_page():
             count += 1
             disp_orders[order.id] = []
             # get the tracking number
-            key = E.get_key(f"{current_user.username.upper()}{count}_TRACKING_NUMBER_KEY")
+            key = E.get_key(
+                f"{current_user.username.upper()}{count}_TRACKING_NUMBER_KEY"
+            )
             tracking_number = E.aes_decrypt(order.tracking_number, key)
             disp_orders[order.id].append(tracking_number)
             # same for the billing and shipping addresses
-            key = E.get_key(f"{current_user.username.upper()}{count}_BILLING_ADDRESS_KEY")
+            key = E.get_key(
+                f"{current_user.username.upper()}{count}_BILLING_ADDRESS_KEY"
+            )
             billing_address = E.aes_decrypt(order.billing_address, key)
             disp_orders[order.id].append(billing_address)
-            
-            key = E.get_key(f"{current_user.username.upper()}{count}_SHIPPING_ADDRESS_KEY")
+
+            key = E.get_key(
+                f"{current_user.username.upper()}{count}_SHIPPING_ADDRESS_KEY"
+            )
             shipping_address = E.aes_decrypt(order.shipping_address, key)
             disp_orders[order.id].append(shipping_address)
-
-
 
         # get product names
 
