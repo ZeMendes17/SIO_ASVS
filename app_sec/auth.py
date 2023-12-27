@@ -86,7 +86,7 @@ def form_login():
 
         # Send OTP via email
         # get the user's email key
-        email_key = E.get_key(f"{username}_EMAIL_KEY")
+        email_key = E.get_key(f"{username.upper()}_EMAIL_KEY")
         # decrypt the user's email
         email = E.aes_decrypt(user.email, email_key)
         send_otp_via_email(email)
@@ -155,22 +155,22 @@ def authorize_google():
 
         user = None
         # Check if user exists with that email
-        users = db.session.execute("SELECT * FROM users").fetchall()
-        for user in users:
+        users = db.session.execute(text("SELECT * FROM user")).fetchall()
+        for u in users:
             # get the user's email key
-            email_key = E.get_key(f"{user.username}_EMAIL_KEY")
+            email_key = E.get_key(f"{u.username.upper()}_EMAIL_KEY")
             # decrypt the user's email
-            user_email = E.aes_decrypt(user.email, email_key)\
+            user_email = E.aes_decrypt(u.email, email_key)
 
             if user_email == email:
-                user = User.query.filter_by(username=user.username).first()
+                user = User.query.filter_by(username=u.username).first()
                 break
 
         if not user:
             # create a new user
             key = E.generate_key()
             # store the key
-            E.store_key(key, f"{username}_EMAIL_KEY")
+            E.store_key(key, f"{username.upper()}_EMAIL_KEY")
             # encrypt the email
             email = E.aes_encrypt(email, key)
             new_user = User(
