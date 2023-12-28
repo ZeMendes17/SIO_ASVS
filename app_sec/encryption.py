@@ -68,17 +68,23 @@ def get_key(name):
 def chacha20_encrypt(message, key):
     iv = os.urandom(16)
 
-    cipher = Cipher(algorithms.ChaCha20(key, iv), mode=None, backend=default_backend())
-    encryptor = cipher.encryptor()
-
-    ciphertext = encryptor.update(message.encode()) + encryptor.finalize()
-    return iv + ciphertext
+    try:
+        cipher = Cipher(algorithms.ChaCha20(key, iv), mode=None, backend=default_backend())
+        encryptor = cipher.encryptor()
+        ciphertext = encryptor.update(message.encode()) + encryptor.finalize()
+        return iv + ciphertext
+    except Exception as e:
+        print("Encryption error:", e)
+        return None
 
 def chacha20_decrypt(ciphertext, key):
     iv = ciphertext[:16]
 
-    cipher = Cipher(algorithms.ChaCha20(key, iv), mode=None, backend=default_backend())
-    decryptor = cipher.decryptor()
-
-    plaintext = decryptor.update(ciphertext[16:]) + decryptor.finalize()
-    return plaintext.decode()
+    try:
+        cipher = Cipher(algorithms.ChaCha20(key, iv), mode=None, backend=default_backend())
+        decryptor = cipher.decryptor()
+        plaintext = decryptor.update(ciphertext[16:]) + decryptor.finalize()
+        return plaintext.decode()
+    except Exception as e:
+        print("Decryption error:", e)
+        return None
