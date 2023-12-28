@@ -40,6 +40,9 @@ def generate_key():
 
 def store_key(key, name):
     os.environ[name] = key.hex()
+    # if there is no .env file, create one
+    if not os.path.exists('.env'):
+        open('.env', 'w').close()
     # if the key is already in the .env file, remove it
     with open('.env', 'r') as f:
         lines = f.readlines()
@@ -61,3 +64,21 @@ def get_key(name):
             for line in f:
                 if line.startswith(name):
                     return bytes.fromhex(line.split('=')[1])
+                
+def chacha20_encrypt(message, key):
+    iv = os.urandom(16)
+
+    cipher = Cipher(algorithms.ChaCha20(key, iv), mode=None, backend=default_backend())
+    encryptor = cipher.encryptor()
+
+    ciphertext = encryptor.update(message.encode()) + encryptor.finalize()
+    return iv + ciphertext
+
+def chacha20_decrypt(ciphertext, key):
+    iv = ciphertext[:16]
+
+    cipher = Cipher(algorithms.ChaCha20(key, iv), mode=None, backend=default_backend())
+    decryptor = cipher.decryptor()
+
+    plaintext = decryptor.update(ciphertext[16:]) + decryptor.finalize()
+    return plaintext.decode()

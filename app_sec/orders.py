@@ -62,15 +62,15 @@ def orders_page():
             disp_orders[order.id] = []
             # get the tracking number
             key = E.get_key(f"{current_user.username.upper()}{count}_TRACKING_NUMBER_KEY")
-            tracking_number = E.aes_decrypt(order.tracking_number, key)
+            tracking_number = E.chacha20_decrypt(order.tracking_number, key)
             disp_orders[order.id].append(tracking_number)
             # same for the billing and shipping addresses
             key = E.get_key(f"{current_user.username.upper()}{count}_BILLING_ADDRESS_KEY")
-            billing_address = E.aes_decrypt(order.billing_address, key)
+            billing_address = E.chacha20_decrypt(order.billing_address, key)
             disp_orders[order.id].append(billing_address)
             
             key = E.get_key(f"{current_user.username.upper()}{count}_SHIPPING_ADDRESS_KEY")
-            shipping_address = E.aes_decrypt(order.shipping_address, key)
+            shipping_address = E.chacha20_decrypt(order.shipping_address, key)
             disp_orders[order.id].append(shipping_address)
 
 

@@ -136,7 +136,7 @@ def changeProfileForm():
             key = E.generate_key()
             # store the key
             E.store_key(key, f"{user.username}_PHONE_KEY")
-            user.phone = E.aes_encrypt(phone, key)
+            user.phone = E.chacha20_encrypt(phone, key)
 
 
         if image:

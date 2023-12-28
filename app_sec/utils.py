@@ -32,19 +32,19 @@ def generate_users():
     # admin - email
     key = E.generate_key()
     E.store_key(key, "ADMIN_EMAIL_KEY")
-    admin_email = E.aes_encrypt("admin@gmail.com", key)
+    admin_email = E.chacha20_encrypt("admin@gmail.com", key)
     # admin - phone
     key = E.generate_key()
     E.store_key(key, "ADMIN_PHONE_KEY")
-    admin_phone = E.aes_encrypt("123456789", key)
+    admin_phone = E.chacha20_encrypt("123456789", key)
     # user - email
     key = E.generate_key()
     E.store_key(key, "USER_EMAIL_KEY")
-    user_email = E.aes_encrypt("user@gmail.com", key)
+    user_email = E.chacha20_encrypt("user@gmail.com", key)
     # user - phone
     key = E.generate_key()
     E.store_key(key, "USER_PHONE_KEY")
-    user_phone = E.aes_encrypt("987654321", key)
+    user_phone = E.chacha20_encrypt("987654321", key)
 
     users = [
         {
@@ -292,27 +292,27 @@ def generate_orders():
     # order 1 - tracking number
     key = E.generate_key()
     E.store_key(key, "USER1_TRACKING_NUMBER_KEY")
-    o1_track = E.aes_encrypt("T5rLgPq3W7Yv", key)
+    o1_track = E.chacha20_encrypt("T5rLgPq3W7Yv", key)
     # order 1 - shipping address
     key = E.generate_key()
     E.store_key(key, "USER1_SHIPPING_ADDRESS_KEY")
-    o1_shipping_address = E.aes_encrypt("Rua do Campo Alegre, 1021, 4150-180 Porto", key)
+    o1_shipping_address = E.chacha20_encrypt("Rua do Campo Alegre, 1021, 4150-180 Porto", key)
     # order 1 - billing address
     key = E.generate_key()
     E.store_key(key, "USER1_BILLING_ADDRESS_KEY")
-    o1_billing_address = E.aes_encrypt("Rua do Campo Alegre, 1021, 4150-180 Porto", key)
+    o1_billing_address = E.chacha20_encrypt("Rua do Campo Alegre, 1021, 4150-180 Porto", key)
     # order 2 - tracking number
     key = E.generate_key()
     E.store_key(key, "USER2_TRACKING_NUMBER_KEY")
-    o2_track = E.aes_encrypt("aR6NpHj2MzFy", key)
+    o2_track = E.chacha20_encrypt("aR6NpHj2MzFy", key)
     # order 2 - shipping address
     key = E.generate_key()
     E.store_key(key, "USER2_SHIPPING_ADDRESS_KEY")
-    o2_shipping_address = E.aes_encrypt("Rua do Campo Alegre, 1021, 4150-180 Porto", key)
+    o2_shipping_address = E.chacha20_encrypt("Rua do Campo Alegre, 1021, 4150-180 Porto", key)
     # order 2 - billing address
     key = E.generate_key()
     E.store_key(key, "USER2_BILLING_ADDRESS_KEY")
-    o2_billing_address = E.aes_encrypt("Rua do Campo Alegre, 1021, 4150-180 Porto", key)
+    o2_billing_address = E.chacha20_encrypt("Rua do Campo Alegre, 1021, 4150-180 Porto", key)
 
 
     orders = [

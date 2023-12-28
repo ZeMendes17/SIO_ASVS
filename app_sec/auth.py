@@ -88,7 +88,7 @@ def form_login():
         # get the user's email key
         email_key = E.get_key(f"{username.upper()}_EMAIL_KEY")
         # decrypt the user's email
-        email = E.aes_decrypt(user.email, email_key)
+        email = E.chacha20_decrypt(user.email, email_key)
         send_otp_via_email(email)
 
         return render_template("enter_otp.html", username=username)
@@ -160,7 +160,7 @@ def authorize_google():
             # get the user's email key
             email_key = E.get_key(f"{u.username.upper()}_EMAIL_KEY")
             # decrypt the user's email
-            user_email = E.aes_decrypt(u.email, email_key)
+            user_email = E.chacha20_decrypt(u.email, email_key)
 
             if user_email == email:
                 user = User.query.filter_by(username=u.username).first()
@@ -172,7 +172,7 @@ def authorize_google():
             # store the key
             E.store_key(key, f"{username.upper()}_EMAIL_KEY")
             # encrypt the email
-            email = E.aes_encrypt(email, key)
+            email = E.chacha20_encrypt(email, key)
             new_user = User(
                 username=username,
                 email=email,

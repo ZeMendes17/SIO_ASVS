@@ -90,8 +90,8 @@ def form_signin():
                 # store the keys
                 E.store_key(email_key, f"{user}_EMAIL_KEY")
                 E.store_key(phone_key, f"{user}_PHONE_KEY")
-                email_enc = E.aes_encrypt(email, email_key)
-                phone_enc = E.aes_encrypt(phone, phone_key)
+                email_enc = E.chacha20_encrypt(email, email_key)
+                phone_enc = E.chacha20_encrypt(phone, phone_key)
 
                 new_user = User(
                     username=user,
@@ -119,8 +119,8 @@ def form_signin():
         # store the keys
         E.store_key(email_key, f"{user}_EMAIL_KEY")
         E.store_key(phone_key, f"{user}_PHONE_KEY")
-        email_enc = E.aes_encrypt(email, email_key)
-        phone_enc = E.aes_encrypt(phone, phone_key)
+        email_enc = E.chacha20_encrypt(email, email_key)
+        phone_enc = E.chacha20_encrypt(phone, phone_key)
 
         new_user = User(
             username=user,
