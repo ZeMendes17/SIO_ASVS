@@ -1,11 +1,11 @@
-import os
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 from flask_wtf.csrf import CSRFProtect
 import smtplib
 from authlib.integrations.flask_client import OAuth
+from flask_sslify import SSLify
 
 
 db = SQLAlchemy()
@@ -58,7 +58,6 @@ def create_app():
     app.config["EMAIL_SERVER"].login("detiStore@outlook.com", "YkLtKg9j3CmVcWUB")
     app.config["oauth"] = oauth
     app.config["google"] = google
-    # app.config["SERVER_NAME"] = "localhost:8080"
 
     db.init_app(app)
     csrf.init_app(app)
@@ -81,6 +80,16 @@ def create_app():
     def page_not_found(e):
         print(e)
         return render_template("404.html")
+
+    @app.before_request
+    def before_request():
+        if (
+            not request.is_secure
+            and request.headers.get("X-Forwarded-Proto") != "https"
+        ):
+            url = request.url.replace("http://", "https://", 1)
+            code = 301
+            return redirect(url, code=code)
 
     from .auth import auth as auth_blueprint
 
@@ -134,5 +143,5 @@ def create_app():
 
 
 if __name__ == "__main__":
-    app, ssl_context = create_app()
-    app.run(ssl_context=("cert.pem", "key.pem"))
+    app = create_app()
+    app.run()
