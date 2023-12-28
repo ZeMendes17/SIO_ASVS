@@ -10,4 +10,7 @@ RUN venv/bin/pip install --upgrade pip && venv/bin/pip install -r requirements.t
 RUN pip install --upgrade pip && pip install -r requirements.txt
 EXPOSE 5000
 COPY . .
-CMD ["flask", "run"]
+CMD ["bash", "-c", "\
+    export FLASK_APP=__init__.py && \
+    export FLASK_DEBUG=1 && \
+    flask run --cert=cert.pem --key=key.pem"]
