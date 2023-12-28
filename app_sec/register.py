@@ -103,6 +103,9 @@ def form_signin():
                 E.store_key(phone_key, f"{user}_PHONE_KEY")
                 email_enc = E.chacha20_encrypt(email, email_key)
                 phone_enc = E.chacha20_encrypt(phone, phone_key)
+                if email_enc is None or phone_enc is None:
+                    flash("Erro ao encriptar email ou número de telefone!")
+                    return redirect(url_for("register.regist"))
 
                 new_user = User(
                     username=user,
@@ -133,6 +136,9 @@ def form_signin():
         E.store_key(phone_key, f"{user}_PHONE_KEY")
         email_enc = E.chacha20_encrypt(email, email_key)
         phone_enc = E.chacha20_encrypt(phone, phone_key)
+        if email_enc is None or phone_enc is None:
+            flash("Erro ao encriptar email ou número de telefone!")
+            return redirect(url_for("register.regist"))
 
         new_user = User(
             username=user,

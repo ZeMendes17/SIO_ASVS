@@ -159,6 +159,10 @@ def form_checkout():
                 f"{current_user.username.upper()}{number_of_orders+1}_TRACKING_NUMBER_KEY",
             )
             tracking_number_enc = E.chacha20_encrypt(generate_tracking_number(), key)
+            if tracking_number_enc is None:
+                flash("Erro ao encriptar tracking number!", category="danger")
+                return redirect(url_for("checkout.check"))
+            
             # encrypt the shipping address
             key = E.generate_key()
             E.store_key(
@@ -166,6 +170,10 @@ def form_checkout():
                 f"{current_user.username.upper()}{number_of_orders+1}_SHIPPING_ADDRESS_KEY",
             )
             shipping_address_enc = E.chacha20_encrypt(address, key)
+            if shipping_address_enc is None:
+                flash("Erro ao encriptar shipping address!", category="danger")
+                return redirect(url_for("checkout.check"))
+            
             # encrypt the billing address
             key = E.generate_key()
             E.store_key(
@@ -173,6 +181,9 @@ def form_checkout():
                 f"{current_user.username.upper()}{number_of_orders+1}_BILLING_ADDRESS_KEY",
             )
             billing_address_enc = E.chacha20_encrypt(address2, key)
+            if billing_address_enc is None:
+                flash("Erro ao encriptar billing address!", category="danger")
+                return redirect(url_for("checkout.check"))
 
             new_order = Order(
                 order_number=number_of_orders + 1,

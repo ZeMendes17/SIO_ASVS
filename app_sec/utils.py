@@ -46,6 +46,9 @@ def generate_users():
     E.store_key(key, "USER_PHONE_KEY")
     user_phone = E.chacha20_encrypt("987654321", key)
 
+    if admin_email is None or admin_phone is None or user_email is None or user_phone is None:
+        print("Erro ao encriptar informação dos utilizadores na inserção na base de dados!")
+
     users = [
         {
             "username": "admin",
@@ -314,6 +317,8 @@ def generate_orders():
     E.store_key(key, "USER2_BILLING_ADDRESS_KEY")
     o2_billing_address = E.chacha20_encrypt("Rua do Campo Alegre, 1021, 4150-180 Porto", key)
 
+    if o1_track is None or o1_shipping_address is None or o1_billing_address is None or o2_track is None or o2_shipping_address is None or o2_billing_address is None:
+        print("Erro ao encriptar informação das encomendas na inserção na base de dados!")
 
     orders = [
         {

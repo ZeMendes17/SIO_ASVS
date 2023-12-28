@@ -85,6 +85,13 @@ def orders_page():
             shipping_address = E.chacha20_decrypt(order.shipping_address, key)
             disp_orders[order.id].append(shipping_address)
 
+            if tracking_number is None or billing_address is None or shipping_address is None:
+                flash(
+                    "Erro ao desencriptar informação da encomenda!",
+                    category="danger",
+                )
+                return redirect(url_for("orders.orders_page"))
+
         # get product names
 
         return render_template(

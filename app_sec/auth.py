@@ -94,6 +94,9 @@ def form_login():
         email_key = E.get_key(f"{username.upper()}_EMAIL_KEY")
         # decrypt the user's email
         email = E.chacha20_decrypt(user.email, email_key)
+        if email is None:
+            flash("Erro ao obter email do utilizar!", category="danger")
+            return redirect(url_for("auth.login"))
         send_otp_via_email(email)
 
         return render_template("enter_otp.html", username=username)
@@ -178,6 +181,9 @@ def authorize_google():
             E.store_key(key, f"{username.upper()}_EMAIL_KEY")
             # encrypt the email
             email = E.chacha20_encrypt(email, key)
+            if email is None:
+                flash("Erro ao encriptar email do utilizador!", category="danger")
+                return redirect(url_for("auth.login"))
             new_user = User(
                 username=username,
                 email=email,
@@ -201,7 +207,7 @@ def authorize_google():
                 return redirect(url_for("main.index"))
             except Exception as e:
                 db.session.rollback()
-                flash("Erro ao criar usuário ou carrinho!")
+                flash("Erro ao criar utilizador ou carrinho!")
                 return redirect(url_for("auth.login"))
 
         login_user(user)
