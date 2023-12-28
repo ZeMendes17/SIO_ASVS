@@ -17,7 +17,7 @@ import pyotp
 from . import encryption as E
 import uuid
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 auth = Blueprint("auth", __name__)
 
@@ -29,8 +29,11 @@ logger = logging.getLogger(__name__)
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
+    print("Login")
     try:
         if current_user.is_authenticated:
+            current_user.last_activity_time = datetime.utcnow()
+            db.session.commit()
             return redirect(url_for("main.index"))
         else:
             if request.method == "POST":
@@ -45,9 +48,11 @@ def login():
                     return redirect(url_for("auth.login"))
                 else:
                     # Log in the user
+                    print("User is authenticated")
                     login_user(user)
                     return redirect(url_for("main.index"))
             else:
+                print("User is not authenticated")
                 return render_template("login.html")
     except Exception as e:
         # Handle unexpected errors
@@ -228,3 +233,26 @@ def handle_error(e):
 
 def generate_unique_error_id():
     return str(uuid.uuid4())
+
+
+@login_required
+def recheck_login():
+    # Check if re-authentication is needed based on the configured periods
+    idle_period_limit = datetime.utcnow() - timedelta(days=30)  # L1: 30 days
+    actively_used_limit = datetime.utcnow() - timedelta(hours=12)  # L2: 12 hours
+
+    if current_user.last_activity_time < idle_period_limit:
+        # Re-authenticate for idle period
+        flash("Please re-enter your password to continue.", "danger")
+
+        logout_user()
+
+        return redirect(url_for("auth.login"))
+
+    if current_user.last_activity_time < actively_used_limit:
+        # Re-authenticate for actively used period
+        flash("Please re-enter your password to continue.", "danger")
+
+        logout_user()
+
+        return redirect(url_for("auth.login"))

@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
@@ -57,6 +58,7 @@ def create_app():
     app.config["EMAIL_SERVER"].login("detiStore@outlook.com", "YkLtKg9j3CmVcWUB")
     app.config["oauth"] = oauth
     app.config["google"] = google
+    # app.config["SERVER_NAME"] = "localhost:8080"
 
     db.init_app(app)
     csrf.init_app(app)
@@ -129,3 +131,8 @@ def create_app():
     app.register_blueprint(admin_blueprint)
 
     return app
+
+
+if __name__ == "__main__":
+    app, ssl_context = create_app()
+    app.run(ssl_context=("cert.pem", "key.pem"))
