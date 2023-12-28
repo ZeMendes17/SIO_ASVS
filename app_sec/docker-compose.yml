@@ -10,3 +10,16 @@ services:
       - .:/app
     environment:
       FLASK_DEBUG: "False"
+
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./cert.pem:/etc/nginx/cert.pem
+      - ./key.pem:/etc/nginx/key.pem
+    depends_on:
+      - web
