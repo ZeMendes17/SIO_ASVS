@@ -47,12 +47,16 @@ def index():
 
     except Exception as e:
         # Handle unexpected errors
-        handle_error(e)
+        return handle_error(e)
 
 
 def handle_error(e):
     error_id = generate_unique_error_id()
-    timestamp = datetime.utcnow().isoformat()
+    # check if datetime as atribute utcnow
+    if hasattr(datetime, "utcnow"):
+        timestamp = datetime.utcnow().isoformat()
+    else:
+        timestamp = datetime.datetime.now().isoformat()
     user_info = (
         f"User: {current_user.username}"
         if current_user.is_authenticated

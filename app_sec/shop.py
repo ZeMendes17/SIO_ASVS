@@ -21,7 +21,11 @@ logger = logging.getLogger(__name__)
 
 def handle_error(e, redirect_route, flash_message):
     error_id = generate_unique_error_id()
-    timestamp = datetime.utcnow().isoformat()
+    # check if datetime as atribute utcnow
+    if hasattr(datetime, "utcnow"):
+        timestamp = datetime.utcnow().isoformat()
+    else:
+        timestamp = datetime.datetime.now().isoformat()
     user_info = (
         f"User: {current_user.username}"
         if current_user.is_authenticated

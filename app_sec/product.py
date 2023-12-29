@@ -15,6 +15,7 @@ from sqlalchemy import text
 from . import db
 import logging
 
+logger = logging.getLogger(__name__)
 products = Blueprint("product", __name__)
 
 
@@ -62,7 +63,7 @@ def product(id):
 
     except Exception as e:
         # Handle unexpected errors
-        handle_error(e)
+        return handle_error(e)
 
 
 @products.route("/product/add_to_cart/<int:id>", methods=["POST"])
@@ -103,7 +104,7 @@ def add_to_cart(id):
 
     except Exception as e:
         # Handle unexpected errors
-        handle_error(e)
+        return handle_error(e)
 
 
 @products.route("/product/<int:id>/addcomment", methods=["POST"])
@@ -143,7 +144,7 @@ def addcomment(id):
 
     except Exception as e:
         # Handle unexpected errors
-        handle_error(e)
+        return handle_error(e)
 
 
 @products.route("/product/add_to_wishlist/<int:id>", methods=["POST"])
@@ -184,12 +185,16 @@ def add_to_wishlist(id):
 
     except Exception as e:
         # Handle unexpected errors
-        handle_error(e)
+        return handle_error(e)
 
 
 def handle_error(e):
     error_id = generate_unique_error_id()
-    timestamp = datetime.utcnow().isoformat()
+    # check if datetime as atribute utcnow
+    if hasattr(datetime, "utcnow"):
+        timestamp = datetime.utcnow().isoformat()
+    else:
+        timestamp = datetime.datetime.now().isoformat()
     user_info = (
         f"User: {current_user.username}"
         if current_user.is_authenticated

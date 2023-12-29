@@ -178,7 +178,11 @@ def check_breached_password(password):
 
 def handle_error(e):
     error_id = generate_unique_error_id()
-    timestamp = datetime.utcnow().isoformat()
+    # check if datetime as atribute utcnow
+    if hasattr(datetime, "utcnow"):
+        timestamp = datetime.utcnow().isoformat()
+    else:
+        timestamp = datetime.datetime.now().isoformat()
     logger.error("Error ID: %s\nTimestamp: %s\n%s\n%s", error_id, timestamp, str(e))
 
     flash(
