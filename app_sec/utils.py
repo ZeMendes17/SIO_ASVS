@@ -3,6 +3,7 @@ from . import db
 from .models import User, Product, Comment, Cart, Wishlist, Order, OrderProduct
 from sqlalchemy import text
 from werkzeug.security import generate_password_hash
+from . import encryption as E
 
 utl = Blueprint("util", __name__)
 
@@ -27,14 +28,35 @@ def generate_users():
     query = text("DELETE FROM user")
     db.session.execute(query)
     db.session.commit()
+    # generate key and encrypt the email and phone of the users
+    # admin - email
+    key = E.generate_key()
+    E.store_key(key, "ADMIN_EMAIL_KEY")
+    admin_email = E.chacha20_encrypt("admin@gmail.com", key)
+    # admin - phone
+    key = E.generate_key()
+    E.store_key(key, "ADMIN_PHONE_KEY")
+    admin_phone = E.chacha20_encrypt("123456789", key)
+    # user - email
+    key = E.generate_key()
+    E.store_key(key, "USER_EMAIL_KEY")
+    user_email = E.chacha20_encrypt("user@gmail.com", key)
+    # user - phone
+    key = E.generate_key()
+    E.store_key(key, "USER_PHONE_KEY")
+    user_phone = E.chacha20_encrypt("987654321", key)
+
+    if admin_email is None or admin_phone is None or user_email is None or user_phone is None:
+        print("Erro ao encriptar informação dos utilizadores na inserção na base de dados!")
+
     users = [
         {
             "username": "admin",
             "password": generate_password_hash("admin1234"),
             "isAdmin": True,
             "name": "Admin",
-            "email": "admin@gmail.com",
-            "phone": "123456789",
+            "email": admin_email,
+            "phone": admin_phone,
             "security_question": "question1-Orange",
             "google_account": False,
         },
@@ -43,8 +65,8 @@ def generate_users():
             "password": generate_password_hash("user1234"),
             "isAdmin": False,
             "name": "User",
-            "email": "user@gmail.com",
-            "phone": "987654321",
+            "email": user_email,
+            "phone": user_phone,
             "security_question": "question1-Black",
             "google_account": False,
         },
@@ -269,6 +291,35 @@ def generate_orders():
     query = text("DELETE FROM order_product")
     db.session.execute(query)
     db.session.commit()
+    # generate key and encrypt the tracking number, shipping address and billing address of the orders
+    # order 1 - tracking number
+    key = E.generate_key()
+    E.store_key(key, "USER1_TRACKING_NUMBER_KEY")
+    o1_track = E.chacha20_encrypt("T5rLgPq3W7Yv", key)
+    # order 1 - shipping address
+    key = E.generate_key()
+    E.store_key(key, "USER1_SHIPPING_ADDRESS_KEY")
+    o1_shipping_address = E.chacha20_encrypt("Rua do Campo Alegre, 1021, 4150-180 Porto", key)
+    # order 1 - billing address
+    key = E.generate_key()
+    E.store_key(key, "USER1_BILLING_ADDRESS_KEY")
+    o1_billing_address = E.chacha20_encrypt("Rua do Campo Alegre, 1021, 4150-180 Porto", key)
+    # order 2 - tracking number
+    key = E.generate_key()
+    E.store_key(key, "USER2_TRACKING_NUMBER_KEY")
+    o2_track = E.chacha20_encrypt("aR6NpHj2MzFy", key)
+    # order 2 - shipping address
+    key = E.generate_key()
+    E.store_key(key, "USER2_SHIPPING_ADDRESS_KEY")
+    o2_shipping_address = E.chacha20_encrypt("Rua do Campo Alegre, 1021, 4150-180 Porto", key)
+    # order 2 - billing address
+    key = E.generate_key()
+    E.store_key(key, "USER2_BILLING_ADDRESS_KEY")
+    o2_billing_address = E.chacha20_encrypt("Rua do Campo Alegre, 1021, 4150-180 Porto", key)
+
+    if o1_track is None or o1_shipping_address is None or o1_billing_address is None or o2_track is None or o2_shipping_address is None or o2_billing_address is None:
+        print("Erro ao encriptar informação das encomendas na inserção na base de dados!")
+
     orders = [
         {
             "order_number": 1,
@@ -276,9 +327,9 @@ def generate_orders():
             "date": "01/10/2022",
             "tax": 3.99,
             "shipping_cost": 4.99,
-            "tracking_number": "T5rLgPq3W7Yv",
-            "shipping_address": "Rua do Campo Alegre, 1021, 4150-180 Porto",
-            "billing_address": "Rua do Campo Alegre, 1021, 4150-180 Porto",
+            "tracking_number": o1_track,
+            "shipping_address": o1_shipping_address,
+            "billing_address": o1_billing_address,
         },
         {
             "order_number": 2,
@@ -287,8 +338,8 @@ def generate_orders():
             "tax": 3.99,
             "shipping_cost": 4.99,
             "tracking_number": "aR6NpHj2MzFy",
-            "shipping_address": "Rua do Campo Alegre, 1021, 4150-180 Porto",
-            "billing_address": "Rua do Campo Alegre, 1021, 4150-180 Porto",
+            "shipping_address": o2_shipping_address,
+            "billing_address": o2_billing_address,
         },
     ]
 

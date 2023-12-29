@@ -1,10 +1,11 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 from flask_wtf.csrf import CSRFProtect
 import smtplib
 from authlib.integrations.flask_client import OAuth
+from flask_sslify import SSLify
 
 
 db = SQLAlchemy()
@@ -80,6 +81,16 @@ def create_app():
         print(e)
         return render_template("404.html")
 
+    @app.before_request
+    def before_request():
+        if (
+            not request.is_secure
+            and request.headers.get("X-Forwarded-Proto") != "https"
+        ):
+            url = request.url.replace("http://", "https://", 1)
+            code = 301
+            return redirect(url, code=code)
+
     from .auth import auth as auth_blueprint
 
     app.register_blueprint(auth_blueprint)
@@ -129,3 +140,8 @@ def create_app():
     app.register_blueprint(admin_blueprint)
 
     return app
+
+
+if __name__ == "__main__":
+    app = create_app()
+    app.run()

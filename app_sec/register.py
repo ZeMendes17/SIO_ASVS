@@ -17,6 +17,7 @@ from sqlalchemy import text
 import re
 import requests
 import hashlib
+from . import encryption as E
 import logging
 from datetime import datetime
 
@@ -76,39 +77,75 @@ def form_signin():
 
     # Verifique se a imagem é válida
     if profile_picture:
-        if profile_picture.filename.endswith(
-            ".png"
-        ) or profile_picture.filename.endswith(".jpeg"):
+        if (
+            profile_picture.filename.endswith(".png")
+            or profile_picture.filename.endswith(".jpeg")
+            or profile_picture.filename.endswith(".jpg")
+        ):
+            #  check if picture is bigger than 5MB
+            if len(profile_picture.read()) > 5 * 1024 * 1024:
+                flash("Imagem muito grande! Maximo de 5MB", category="danger")
+                return redirect(url_for("register.regist"))
+
             try:
+                upload_folder = "static/images"
+                os.makedirs(upload_folder, exist_ok=True)
+
+                # Save the file to the directory
                 profile_picture.save(
-                    os.path.join("app_sec/static/images", profile_picture.filename)
+                    os.path.join(upload_folder, profile_picture.filename)
                 )
+                # encrypt email and phone number
+                email_key = E.generate_key()
+                phone_key = E.generate_key()
+                # store the keys
+                E.store_key(email_key, f"{user}_EMAIL_KEY")
+                E.store_key(phone_key, f"{user}_PHONE_KEY")
+                email_enc = E.chacha20_encrypt(email, email_key)
+                phone_enc = E.chacha20_encrypt(phone, phone_key)
+                if email_enc is None or phone_enc is None:
+                    flash("Erro ao encriptar email ou número de telefone!")
+                    return redirect(url_for("register.regist"))
+
                 new_user = User(
                     username=user,
                     password=generate_password_hash(key),
                     name=nome,
-                    email=email,
-                    phone=phone,
+                    email=email_enc,
+                    phone=phone_enc,
                     image="../static/images/" + profile_picture.filename,
                     security_question=security_question,
                     google_account=False,
                 )
-            except:
+            except Exception as e:
+                print(e)
                 flash("Erro ao fazer upload da imagem!", category="danger")
                 return redirect(url_for("register.regist"))
         else:
             flash(
-                "Por favor insira uma imagem com extensão .png ou .jpeg",
+                "Por favor insira uma imagem com extensão .png ou .jpeg ou .jpg",
                 category="danger",
             )
             return redirect(url_for("register.regist"))
     else:
+        # encrypt email and phone number
+        email_key = E.generate_key()
+        phone_key = E.generate_key()
+        # store the keys
+        E.store_key(email_key, f"{user}_EMAIL_KEY")
+        E.store_key(phone_key, f"{user}_PHONE_KEY")
+        email_enc = E.chacha20_encrypt(email, email_key)
+        phone_enc = E.chacha20_encrypt(phone, phone_key)
+        if email_enc is None or phone_enc is None:
+            flash("Erro ao encriptar email ou número de telefone!")
+            return redirect(url_for("register.regist"))
+
         new_user = User(
             username=user,
             password=generate_password_hash(key),
             name=nome,
-            email=email,
-            phone=phone,
+            email=email_enc,
+            phone=phone_enc,
             security_question=security_question,
             google_account=False,
         )

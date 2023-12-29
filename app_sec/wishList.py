@@ -14,6 +14,7 @@ from .models import Comment, Product, Cart
 from . import db
 from datetime import datetime
 import logging
+from .auth import recheck_login
 
 wish_list = Blueprint("wishList", __name__)
 
@@ -49,6 +50,11 @@ def generate_unique_error_id():
 @login_required
 def wishlist():
     try:
+        action = recheck_login()
+
+        if action is not None:
+            return action
+
         query = text("SELECT * FROM cart WHERE customer_id =" + str(current_user.id))
         cart = db.session.execute(query).fetchone()
 

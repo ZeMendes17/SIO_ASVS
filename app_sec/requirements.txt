@@ -8,7 +8,10 @@ flask-marshmallow
 flask_wtf
 SQLAlchemy
 click
-Werkzeug==2.3.0
+werkzeug
+Werkzeug
 requests
 pyotp
 authlib
+cryptography==41.0.7
+flask_sslify

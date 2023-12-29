@@ -18,8 +18,10 @@ import re
 from sqlalchemy.exc import IntegrityError
 import requests
 import hashlib
+from . import encryption as E
 import logging
 from datetime import datetime
+from .auth import recheck_login
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +32,11 @@ profile = Blueprint("profile", __name__)
 @login_required
 def perfil():
     try:
+        action = recheck_login()
+
+        if action is not None:
+            return action
+
         user = User.query.filter_by(id=current_user.id).first()
 
         # get number of items in cart
@@ -131,7 +138,14 @@ def changeProfileForm():
             if not re.match(phone_pattern, phone):
                 flash("Número de telefone inválido!", category="danger")
                 return redirect(url_for("profile.changeProfile", id=user.id))
-            user.phone = phone
+            # encrypt phone number
+            key = E.generate_key()
+            # store the key
+            E.store_key(key, f"{user.username}_PHONE_KEY")
+            user.phone = E.chacha20_encrypt(phone, key)
+            if user.phone is None:
+                flash("Erro ao encriptar número de telefone!", category="danger")
+                return redirect(url_for("profile.changeProfile", id=user.id))
 
         if image:
             if (
