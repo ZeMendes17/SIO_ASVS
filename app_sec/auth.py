@@ -56,12 +56,13 @@ def login():
                 return render_template("login.html")
     except Exception as e:
         # Handle unexpected errors
-        handle_error(e)
+        return handle_error(e)
 
 
 @auth.route("/form_login", methods=["POST"])
 def form_login():
     try:
+        raise Exception("This is a test exception")
         username = request.form["username"]
         key = request.form["password"]
         recaptcha_response = request.form["g-recaptcha-response"]
@@ -102,7 +103,7 @@ def form_login():
         return render_template("enter_otp.html", username=username)
     except Exception as e:
         # Handle unexpected errors
-        handle_error(e)
+        return handle_error(e)
 
 
 @auth.route("/logout", methods=["GET"])
@@ -113,7 +114,7 @@ def logout():
         return redirect(url_for("main.index"))
     except Exception as e:
         # Handle unexpected errors
-        handle_error(e)
+        return handle_error(e)
 
 
 def send_otp_via_email(email):
@@ -135,7 +136,7 @@ def send_otp_via_email(email):
         email_server.sendmail("detiStore@outlook.com", [email], message)
     except Exception as e:
         # Handle unexpected errors
-        handle_error(e)
+        return handle_error(e)
 
 
 @auth.route("/login_google")
@@ -146,7 +147,7 @@ def login_google():
         return google.authorize_redirect(redirect_uri)
     except Exception as e:
         # Handle unexpected errors
-        handle_error(e)
+        return handle_error(e)
 
 
 @auth.route("/authorize_google")
