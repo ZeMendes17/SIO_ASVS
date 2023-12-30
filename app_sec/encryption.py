@@ -1,39 +1,30 @@
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import padding
 import os
 
-def aes_encrypt(message, key):
-    # Generate a random 16-byte Initialization Vector
+def chacha20_encrypt(message, key):
     iv = os.urandom(16)
 
-    padder = padding.PKCS7(algorithms.AES.block_size).padder()
-    padded_message = padder.update(message.encode()) + padder.finalize()
+    try:
+        cipher = Cipher(algorithms.ChaCha20(key, iv), mode=None, backend=default_backend())
+        encryptor = cipher.encryptor()
+        ciphertext = encryptor.update(message.encode()) + encryptor.finalize()
+        return iv + ciphertext
+    except Exception as e:
+        print("Encryption error:", e)
+        return None
 
-    # Create a Cipher object
-    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
-
-    # Encrypt the plaintext
-    encryptor = cipher.encryptor()
-    ciphertext = encryptor.update(padded_message) + encryptor.finalize()
-
-    return iv + ciphertext
-
-def aes_decrypt(ciphertext, key):
-    # Get the Initialization Vector from the ciphertext
+def chacha20_decrypt(ciphertext, key):
     iv = ciphertext[:16]
 
-    # Create a Cipher object
-    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
-
-    # Decrypt the ciphertext
-    decryptor = cipher.decryptor()
-    padded_message = decryptor.update(ciphertext[16:]) + decryptor.finalize()
-
-    unpadder = padding.PKCS7(algorithms.AES.block_size).unpadder()
-    message = unpadder.update(padded_message) + unpadder.finalize()
-
-    return message.decode()
+    try:
+        cipher = Cipher(algorithms.ChaCha20(key, iv), mode=None, backend=default_backend())
+        decryptor = cipher.decryptor()
+        plaintext = decryptor.update(ciphertext[16:]) + decryptor.finalize()
+        return plaintext.decode()
+    except Exception as e:
+        print("Decryption error:", e)
+        return None
 
 def generate_key():
     return os.urandom(32)
@@ -64,27 +55,3 @@ def get_key(name):
             for line in f:
                 if line.startswith(name):
                     return bytes.fromhex(line.split('=')[1])
-                
-def chacha20_encrypt(message, key):
-    iv = os.urandom(16)
-
-    try:
-        cipher = Cipher(algorithms.ChaCha20(key, iv), mode=None, backend=default_backend())
-        encryptor = cipher.encryptor()
-        ciphertext = encryptor.update(message.encode()) + encryptor.finalize()
-        return iv + ciphertext
-    except Exception as e:
-        print("Encryption error:", e)
-        return None
-
-def chacha20_decrypt(ciphertext, key):
-    iv = ciphertext[:16]
-
-    try:
-        cipher = Cipher(algorithms.ChaCha20(key, iv), mode=None, backend=default_backend())
-        decryptor = cipher.decryptor()
-        plaintext = decryptor.update(ciphertext[16:]) + decryptor.finalize()
-        return plaintext.decode()
-    except Exception as e:
-        print("Decryption error:", e)
-        return None
