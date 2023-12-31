@@ -147,7 +147,7 @@ def changeProfileForm():
             # encrypt phone number
             key = E.generate_key()
             # store the key
-            E.store_key(key, f"{user.username}_PHONE_KEY")
+            E.store_key(key, f"{user.username.upper()}_PHONE_KEY")
             user.phone = E.chacha20_encrypt(phone, key)
             if user.phone is None:
                 flash("Erro ao encriptar número de telefone!", category="danger")
@@ -186,7 +186,10 @@ def changeProfileForm():
         db.session.commit()
         flash("Perfil atualizado com sucesso!", category="success")
 
-        email = E.chacha20_decrypt(user.email, E.get_key(f"{user.username}_EMAIL_KEY"))
+        print("EMAIL: ", user.email)
+        print("KEY: ", E.get_key(f"{user.username.upper()}_EMAIL_KEY"))
+        email = E.chacha20_decrypt(user.email, E.get_key(f"{user.username.upper()}_EMAIL_KEY"))
+        print(email)
         send_email_notification(email)
 
         return redirect(url_for("profile.changeProfile", id=user.id))
