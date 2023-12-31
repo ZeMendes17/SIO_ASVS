@@ -80,8 +80,13 @@ def changeProfile():
         else:
             number_of_items = 0
 
+        # decrypt phone number
+        phone = E.chacha20_decrypt(
+            user.phone, E.get_key(f"{user.username.upper()}_PHONE_KEY")
+        )
+
         return render_template(
-            "profile.html", user=user, number_of_items=number_of_items
+            "profile.html", user=user, number_of_items=number_of_items, phone=phone
         )
 
     except Exception as e:

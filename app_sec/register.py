@@ -99,8 +99,8 @@ def form_signin():
                 email_key = E.generate_key()
                 phone_key = E.generate_key()
                 # store the keys
-                E.store_key(email_key, f"{user}_EMAIL_KEY")
-                E.store_key(phone_key, f"{user}_PHONE_KEY")
+                E.store_key(email_key, f"{user.upper()}_EMAIL_KEY")
+                E.store_key(phone_key, f"{user.upper()}_PHONE_KEY")
                 email_enc = E.chacha20_encrypt(email, email_key)
                 phone_enc = E.chacha20_encrypt(phone, phone_key)
                 if email_enc is None or phone_enc is None:
@@ -132,8 +132,8 @@ def form_signin():
         email_key = E.generate_key()
         phone_key = E.generate_key()
         # store the keys
-        E.store_key(email_key, f"{user}_EMAIL_KEY")
-        E.store_key(phone_key, f"{user}_PHONE_KEY")
+        E.store_key(email_key, f"{user.upper()}_EMAIL_KEY")
+        E.store_key(phone_key, f"{user.upper()}_PHONE_KEY")
         email_enc = E.chacha20_encrypt(email, email_key)
         phone_enc = E.chacha20_encrypt(phone, phone_key)
         if email_enc is None or phone_enc is None:
