@@ -32,6 +32,8 @@ class User(db.Model, UserMixin):
     wishlist = db.relationship("Wishlist", backref="user")
     google_account = db.Column(db.Boolean, default=False)
     last_activity_time = db.Column(db.DateTime, default=datetime.utcnow)
+    verification_code = db.Column(db.String(100), nullable=True, default=None)
+    verification_timestamp = db.Column(db.Integer, default=0)
 
 
 class Cart(db.Model):

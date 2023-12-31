@@ -17,6 +17,7 @@ import pyotp
 from . import encryption as E
 import uuid
 import logging
+import time
 from datetime import datetime, timedelta
 
 auth = Blueprint("auth", __name__)
@@ -32,27 +33,31 @@ def login():
     print("Login")
     try:
         if current_user.is_authenticated:
-            current_user.last_activity_time = datetime.utcnow()
+            current_user.last_activity_time = time.time()
             db.session.commit()
             return redirect(url_for("main.index"))
         else:
             if request.method == "POST":
                 username = request.form["username"]
-                otp = request.form["otp"]
+                verification_code = request.form["otp"]
 
                 user = User.query.filter_by(username=username).first()
 
-                # Verify OTP
-                if not totp.verify(otp):
+                if user.verification_code == verification_code:
+                    # Check if the verification code is still valid (e.g., within a certain time limit)
+                    if (
+                        user.verification_timestamp
+                        and (
+                            int(time.time()) - user.verification_timestamp
+                        ).total_seconds()
+                        < 600
+                    ):
+                        login_user(user)
+                        return redirect(url_for("main.index"))
+                else:
                     flash("Invalid Verification Code", category="danger")
                     return redirect(url_for("auth.login"))
-                else:
-                    # Log in the user
-                    print("User is authenticated")
-                    login_user(user)
-                    return redirect(url_for("main.index"))
             else:
-                print("User is not authenticated")
                 return render_template("login.html")
     except Exception as e:
         # Handle unexpected errors
@@ -62,7 +67,6 @@ def login():
 @auth.route("/form_login", methods=["POST"])
 def form_login():
     try:
-        raise Exception("This is a test exception")
         username = request.form["username"]
         key = request.form["password"]
         recaptcha_response = request.form["g-recaptcha-response"]
@@ -90,7 +94,6 @@ def form_login():
             flash("Invalid username or password.", category="danger")
             return redirect(url_for("auth.login"))
 
-        # Send OTP via email
         # get the user's email key
         email_key = E.get_key(f"{username.upper()}_EMAIL_KEY")
         # decrypt the user's email
@@ -98,9 +101,23 @@ def form_login():
         if email is None:
             flash("Erro ao obter email do utilizar!", category="danger")
             return redirect(url_for("auth.login"))
-        send_otp_via_email(email)
 
-        return render_template("enter_otp.html", username=username)
+        # Assuming generate_verification_code is a function to generate a unique code
+        verification_code = totp.now()
+
+        try:
+            print(verification_code)
+            # Save the verification code and timestamp in the database
+            user.verification_code = verification_code
+            user.verification_timestamp = int(time.time())
+            db.session.commit()
+            # Send the verification code via email
+            send_otp_via_email(verification_code, email)
+            return render_template("enter_otp.html", username=username)
+        except Exception as e:
+            flash("Erro ao guardar código de verificação!", category="danger")
+            return redirect(url_for("auth.login"))
+
     except Exception as e:
         # Handle unexpected errors
         return handle_error(e)
@@ -117,9 +134,8 @@ def logout():
         return handle_error(e)
 
 
-def send_otp_via_email(email):
+def send_otp_via_email(otp_code, email):
     try:
-        otp_code = totp.now()
         email_server = current_app.config["EMAIL_SERVER"]
         # Constructing email message
         message = """From: %s\r\nTo: %s\r\nSubject: %s\r\n\

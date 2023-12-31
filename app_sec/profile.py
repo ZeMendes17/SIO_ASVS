@@ -98,6 +98,7 @@ def changeProfileForm():
             return redirect(url_for("profile.changeProfile", id=current_user.id))
 
         user = User.query.filter_by(id=current_user.id).first()
+
         name = request.form.get("name")
         username = request.form.get("username")
         phone = request.form.get("phone")
@@ -180,6 +181,9 @@ def changeProfileForm():
         db.session.commit()
         flash("Perfil atualizado com sucesso!", category="success")
 
+        email = E.chacha20_decrypt(user.email, E.get_key(f"{user.username}_EMAIL_KEY"))
+        send_email_notification(email)
+
         return redirect(url_for("profile.changeProfile", id=user.id))
 
     except Exception as e:
@@ -222,6 +226,29 @@ def check_breached_password(password):
             if tail in response.text:
                 return True  # Password is breached
         return False  # Password is not breached
+    except Exception as e:
+        # Handle unexpected errors
+        return handle_error(e)
+
+
+def send_email_notification(email):
+    try:
+        email_server = current_app.config["EMAIL_SERVER"]
+        # Constructing email message
+        message = """From: %s\r\nTo: %s\r\nSubject: %s\r\n\
+        \r\n\n
+        %s
+        """ % (
+            "detiStore@outlook.com",
+            ", ".join([email]),
+            "Verification Code",
+            f"Dados da sua conta foram alterados. Se não foi você, por favor entre em contacto com o suporte.",
+        )
+        logger.info(message)
+        logger.info(email)
+
+        # Sending email
+        email_server.sendmail("detiStore@outlook.com", [email], message)
     except Exception as e:
         # Handle unexpected errors
         return handle_error(e)

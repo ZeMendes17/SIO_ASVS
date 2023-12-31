@@ -1,9 +1,5 @@
 #!/bin/bash
 
-if [ -d "../instance" ]; then
-  rm -r "../instance/db_sec.sqlite"
-fi
-
 # Generate a self-signed certificate using OpenSSL
 openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365 -subj "/C=PT/ST=Aveiro/L=Aveiro/O=UA/OU=UA/CN=localhost"
 
