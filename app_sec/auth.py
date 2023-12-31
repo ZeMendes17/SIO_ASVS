@@ -30,7 +30,6 @@ logger = logging.getLogger(__name__)
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
-    print("Login")
     try:
         if current_user.is_authenticated:
             current_user.last_activity_time = time.time()
@@ -47,10 +46,7 @@ def login():
                     # Check if the verification code is still valid (e.g., within a certain time limit)
                     if (
                         user.verification_timestamp
-                        and (
-                            int(time.time()) - user.verification_timestamp
-                        ).total_seconds()
-                        < 600
+                        and (int(time.time()) - user.verification_timestamp) < 600
                     ):
                         login_user(user)
                         return redirect(url_for("main.index"))
@@ -137,16 +133,11 @@ def logout():
 def send_otp_via_email(otp_code, email):
     try:
         email_server = current_app.config["EMAIL_SERVER"]
-        # Constructing email message
-        message = """From: %s\r\nTo: %s\r\nSubject: %s\r\n\
-        \r\n\n
-        %s
-        """ % (
-            "detiStore@outlook.com",
-            ", ".join([email]),
-            "Verification Code",
-            f"Your verification code is: {otp_code}",
-        )
+
+        subject = "Verification Code"
+        body = f"Your verification code is: {otp_code}"
+
+        message = f"From: detiStore@outlook.com\r\nTo: {email}\r\nSubject: {subject}\r\n\r\n{body}"
 
         # Sending email
         email_server.sendmail("detiStore@outlook.com", [email], message)
@@ -178,18 +169,8 @@ def authorize_google():
         picture = user_info["picture"]
         name = user_info["name"]
 
-        user = None
+        user = User.query.filter_by(email=email).first()
         # Check if user exists with that email
-        users = db.session.execute(text("SELECT * FROM user")).fetchall()
-        for u in users:
-            # get the user's email key
-            email_key = E.get_key(f"{u.username.upper()}_EMAIL_KEY")
-            # decrypt the user's email
-            user_email = E.chacha20_decrypt(u.email, email_key)
-
-            if user_email == email:
-                user = User.query.filter_by(username=u.username).first()
-                break
 
         if not user:
             # create a new user
@@ -227,8 +208,13 @@ def authorize_google():
                 flash("Erro ao criar utilizador ou carrinho!")
                 return redirect(url_for("auth.login"))
 
-        login_user(user)
-        return redirect(url_for("main.index"))
+        else:
+            if user.google_account:
+                login_user(user)
+                return redirect(url_for("main.index"))
+            else:
+                flash("Já existe um utilizador com esse email!", category="danger")
+                return redirect(url_for("auth.login"))
     except Exception as e:
         # Handle unexpected errors
         return handle_error(e)

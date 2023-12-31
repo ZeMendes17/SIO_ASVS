@@ -66,7 +66,6 @@ def perfil():
 def changeProfile():
     try:
         user = User.query.filter_by(id=current_user.id).first()
-
         # get number of items in cart
         query = text("SELECT * FROM cart WHERE customer_id =" + str(user.id))
 
@@ -81,13 +80,17 @@ def changeProfile():
             number_of_items = 0
 
         # decrypt phone number
-        phone = E.chacha20_decrypt(
-            user.phone, E.get_key(f"{user.username.upper()}_PHONE_KEY")
-        )
-
-        return render_template(
-            "profile.html", user=user, number_of_items=number_of_items, phone=phone
-        )
+        if user.google_account:
+            return render_template(
+                "profile.html", user=user, number_of_items=number_of_items
+            )
+        else:
+            phone = E.chacha20_decrypt(
+                user.phone, E.get_key(f"{user.username.upper()}_PHONE_KEY")
+            )
+            return render_template(
+                "profile.html", user=user, number_of_items=number_of_items, phone=phone
+            )
 
     except Exception as e:
         # Handle unexpected errors
@@ -186,10 +189,11 @@ def changeProfileForm():
         db.session.commit()
         flash("Perfil atualizado com sucesso!", category="success")
 
-        print("EMAIL: ", user.email)
-        print("KEY: ", E.get_key(f"{user.username.upper()}_EMAIL_KEY"))
-        email = E.chacha20_decrypt(user.email, E.get_key(f"{user.username.upper()}_EMAIL_KEY"))
-        print(email)
+        # get the user's email key
+        email_key = E.get_key(f"{user.username.upper()}_EMAIL_KEY")
+        # decrypt the user's email
+        email = E.chacha20_decrypt(user.email, email_key)
+
         send_email_notification(email)
 
         return redirect(url_for("profile.changeProfile", id=user.id))
@@ -242,21 +246,14 @@ def check_breached_password(password):
 def send_email_notification(email):
     try:
         email_server = current_app.config["EMAIL_SERVER"]
-        # Constructing email message
-        message = """From: %s\r\nTo: %s\r\nSubject: %s\r\n\
-        \r\n\n
-        %s
-        """ % (
-            "detiStore@outlook.com",
-            ", ".join([email]),
-            "Verification Code",
-            f"Dados da sua conta foram alterados. Se não foi você, por favor entre em contacto com o suporte.",
-        )
-        logger.info(message)
-        logger.info(email)
+
+        subject = "DetiStore - Dados da sua conta foram alterados"
+        body = "Dados da sua conta foram alterados. Se não foi você, por favor entre em contato com o suporte."
+
+        message = f"From: detiStore@outlook.com\r\nTo: {email}\r\nSubject: {subject}\r\n\r\n{body}"
 
         # Sending email
-        email_server.sendmail("detiStore@outlook.com", [email], message)
+        email_server.sendmail("detiStore@outlook.com", [email], message.encode("utf-8"))
     except Exception as e:
         # Handle unexpected errors
         return handle_error(e)
