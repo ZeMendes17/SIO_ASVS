@@ -11,7 +11,10 @@ chmod u+x run.sh
 ./run.sh
 ```
 
-For the database to update refresh the https://localhost:8080/generate/database page.
+**IMPORTANT**
+
+When you start the application for the first time you must run the following url to populate the database:
+https://localhost:8080/generate/database
 
 ## Authors
 
