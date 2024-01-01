@@ -15,3 +15,5 @@ pyotp
 authlib
 cryptography==41.0.7
 flask_sslify
+pip-check
+safety
