@@ -162,9 +162,18 @@ def changeProfileForm():
                 or image.filename.endswith(".jpeg")
                 or image.filename.endswith(".jpg")
             ):
+                #  check if picture is bigger than 5MB
+                if len(image.read()) > 5 * 1024 * 1024:
+                    flash("Imagem muito grande! Maximo de 5MB", category="danger")
+                    return redirect(url_for("register.regist"))
                 try:
-                    user.image = "../static/images/" + image.filename
-                    image.save(os.path.join("static/images", image.filename))
+                    upload_folder = "static/images/profile_pictures"
+                    file_name = email + "_" + image.filename
+                    os.makedirs(upload_folder, exist_ok=True)
+
+                    user.image = upload_folder + "/" + file_name
+                    image.save(os.path.join(upload_folder, file_name))
+
                 except:
                     flash("Erro ao fazer upload da imagem!", category="danger")
                     return redirect(url_for("profile.changeProfile"))

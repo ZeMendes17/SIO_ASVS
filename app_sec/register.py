@@ -82,19 +82,21 @@ def form_signin():
             or profile_picture.filename.endswith(".jpeg")
             or profile_picture.filename.endswith(".jpg")
         ):
-            #  check if picture is bigger than 5MB
-            if len(profile_picture.read()) > 5 * 1024 * 1024:
-                flash("Imagem muito grande! Maximo de 5MB", category="danger")
-                return redirect(url_for("register.regist"))
-
             try:
-                upload_folder = "static/images"
+                upload_folder = "static/images/profile_pictures"
+                file_name = email + "_" + profile_picture.filename
                 os.makedirs(upload_folder, exist_ok=True)
 
                 # Save the file to the directory
-                profile_picture.save(
-                    os.path.join(upload_folder, profile_picture.filename)
-                )
+                profile_picture.save(os.path.join(upload_folder, file_name))
+
+                #  check if picture is bigger than 5MB
+                if os.path.getsize(upload_folder + "/" + file_name) / (1024 * 1024) > 5:
+                    # remove the file
+                    os.remove(upload_folder + "/" + file_name)
+                    flash("A imagem não pode ter mais de 5MB!", category="danger")
+                    return redirect(url_for("register.regist"))
+
                 # encrypt email and phone number
                 email_key = E.generate_key()
                 phone_key = E.generate_key()
@@ -113,7 +115,7 @@ def form_signin():
                     name=nome,
                     email=email_enc,
                     phone=phone_enc,
-                    image="../static/images/" + profile_picture.filename,
+                    image=upload_folder + "/" + file_name,
                     security_question=security_question,
                     google_account=False,
                 )
@@ -168,7 +170,7 @@ def form_signin():
 
     except IntegrityError:
         db.session.rollback()
-        flash("Username or email already exists!", "error")
+        flash("Username already exists!", "error")
         return redirect(url_for("register.regist"))
 
     except Exception as e:

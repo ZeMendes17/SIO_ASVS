@@ -25,7 +25,9 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(100), unique=True)
     phone = db.Column(db.String(100), nullable=True)
     image = db.Column(
-        db.String(20), nullable=False, default="../static/images/default.jpg"
+        db.String(100),
+        nullable=False,
+        default="static/images/profile_pictures/default.jpg",
     )
     security_question = db.Column(db.String(100), nullable=True)
     cart = db.relationship("Cart", backref="user")
