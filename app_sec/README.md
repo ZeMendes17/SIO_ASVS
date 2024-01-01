@@ -2,15 +2,12 @@
 
 ## How to run
 
-```bash
-dokcer-compose build
-```
+Open a terminal in the folder and run the following commands:
 
 ```bash
-docker-compose up
+touch .env
+chmod u+x run.sh
+./run.sh
 ```
 
-```bash
-open http://localhost:8080/generate/database
-open http://localhost:8080
-```
+For the database to update refresh the https://localhost:8080/generate/database page
