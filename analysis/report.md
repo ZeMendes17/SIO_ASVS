@@ -18,7 +18,7 @@ This project was developed for the "Informatics Security and Organizations" cour
 
 ## 2. Overview
 
-The application is a simple online store that allows users to browse and purchase products. The application is divided into two main components: the client and the server. The client is a web application that allows users to browse and purchase products. The server is a Flask application that provides the client with the necessary data to display the products and allows users to purchase products. 
+The application is a simple online store that allows users to browse and purchase products. The application is divided into two main components: the client and the server. The client is a web application that allows users to browse and purchase products. The server is a Flask application that provides the client with the necessary data to display the products and allows users to purchase products.
 
 The main objective of this project is to identify and mitigate vulnerabilities in the application. The vulnerabilities are divided into various categories following the ASVS standard. The vulnerabilities are described in the following sections.
 
@@ -75,6 +75,7 @@ In our Flask application we redirect all HTTP requests to HTTPS we use the follo
             code = 301
             return redirect(url, code=code)
 ```
+
 With this code, we ensure that all requests made to our Flask application are transmitted securely via HTTPS, enhancing the overall security of the communication channel and protecting sensitive user data.
 
 **Note:**
@@ -98,12 +99,12 @@ To obtain this certificate we used the following command:
 ```bash
 openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365 -subj "/C=PT/ST=Aveiro/L=Aveiro/O=UA/OU=UA/CN=localhost"
 ```
+
 openssl is a command-line tool that can be used to generate certificates. In this case, we used the req command to generate a self-signed certificate. The -x509 option specifies that we want to generate a self-signed certificate. The -newkey option specifies that we want to generate a new key. The rsa:4096 option specifies that we want to generate a 4096-bit RSA key. The -nodes option specifies that we do not want to encrypt the private key. The -out option specifies the output file. The -keyout option specifies the private key file. The -days option specifies the number of days the certificate is valid. The -subj option specifies the subject of the certificate. The subject contains information about the issuer, the validity period, the domain name, etc. In this case, the certificate is issued by the domain name "localhost" and is valid for 365 days.
 
 ### 3.2 File Upload Requirements (V12.1.2)
 
 "Verify that the application will not accept large files that could fill up storage or cause a denial of service."
-
 
 File upload is a common feature in web applications. However, it is also a common source of vulnerabilities. This is because the uploaded files can contain malicious code that can be executed on the server. To prevent this, it is necessary to validate the uploaded files and ensure that they do not contain malicious code.
 
@@ -179,7 +180,7 @@ In case the user tries to upload an image bigger than 5MB, the following error m
 
 Session management is a crucial part of any web application. It is important to ensure that the user's session is terminated when the user logs out or when the session expires. This is done by checking if the user is logged in and if the session has expired. If the user is logged in and the session has not expired, the user will be asked to login again, thus ensuring that the user's session is terminated.
 
-This type of protection is important because it prevents unauthorized users from accessing the user's account. 
+This type of protection is important because it prevents unauthorized users from accessing the user's account.
 
 For this in added a parameter to the User table in the database called "last_activity_time" that stores the last time the user logged in. This parameter is updated every time the user logs in. This is done by using the following code:
 
@@ -236,7 +237,7 @@ If the user is logged in and the session has not expired, the user will be asked
 
 ## 3.4 Error Handling (V7.4.1)
 
-"Verify that a generic message is shown when an unexpected or security sensitive error occurs, potentially with a unique ID which support personnel can use to investigate."  ([C10](https://owasp.org/www-project-proactive-controls/#div-numbering))
+"Verify that a generic message is shown when an unexpected or security sensitive error occurs, potentially with a unique ID which support personnel can use to investigate." ([C10](https://owasp.org/www-project-proactive-controls/#div-numbering))
 
 Error handling is an important part of any application. It is important to ensure that the user is informed of any errors that occur. This is done by displaying an error message to the user. This error message should be generic and should not contain any sensitive information. This is because the error message can be used by attackers to gain information about the application.
 
@@ -301,7 +302,7 @@ This dependencies were added to our requirements.txt which is the used by the do
 
 ```dockerfile
 FROM python:3.11
-WORKDIR /app_sec
+WORKDIR /app
 ENV FLASK_APP=__init__.py
 ENV FLASK_RUN_HOST=0.0.0.0
 RUN apt update -y
