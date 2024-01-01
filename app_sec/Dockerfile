@@ -8,6 +8,8 @@ COPY requirements.txt requirements.txt
 RUN python -m venv venv
 RUN venv/bin/pip install --upgrade pip && venv/bin/pip install -r requirements.txt
 RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN pip-check
+RUN safety check
 EXPOSE 5000
 COPY . .
 CMD ["bash", "-c", "\
