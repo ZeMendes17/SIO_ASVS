@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <!-- Site Metas -->
-    <title>ThewayShop - Ecommerce Bootstrap 4 HTML Template</title>
+    <title>Deti Store</title>
     <meta name="keywords" content="" />
     <meta name="description" content="" />
     <meta name="author" content="" />
@@ -157,14 +157,33 @@
     <!-- Start Wishlist  -->
     <div class="wishlist-box-main">
       <div class="container">
-
-        <form action="/wishlist"  method="post">
-          <div class="input-group justify-content-end row" style="margin-top: 10px; margin-bottom: 20px;">
+        <form action="/wishlist" method="post">
+          <div
+            class="input-group justify-content-end row"
+            style="margin-top: 10px; margin-bottom: 20px"
+          >
             <div class="form-outline">
               <!-- {% if default_value %}{{ default_value }}{% endif %}  this is inside the value below-->
-              <input type="search" name="search_value" value="{% if default_value %}{{ default_value }}{% endif %}" class="form-control" placeholder="Search" style=":focus::placeholder{color:black !important;}">
+              <input
+                type="search"
+                name="search_value"
+                value="{% if default_value %}{{ default_value }}{% endif %}"
+                class="form-control"
+                placeholder="Search"
+                style="
+                  :focus::placeholder {
+                    color: black !important;
+                  }
+                "
+              />
             </div>
-            <input type="submit" name="search" class="btn" style="background-color: #162442 !important; color: white;" value="Search" />   
+            <input
+              type="submit"
+              name="search"
+              class="btn"
+              style="background-color: #162442 !important; color: white"
+              value="Search"
+            />
           </div>
         </form>
 
@@ -200,14 +219,22 @@
                     <td class="price-pr">
                       <p>${{ product.price }}</p>
                     </td>
-                    <td class="quantity-box">{% if product.quantity > 0 %} In Stock {% else %} Out of Stock {% endif %}</td>
+                    <td class="quantity-box">
+                      {% if product.quantity > 0 %} In Stock {% else %} Out of
+                      Stock {% endif %}
+                    </td>
                     <td class="add-pr">
                       <a
                         class="btn hvr-hover"
                         href="/wishlist/add_to_cart/{{ product.id }}"
-                        {% if product.quantity <= 0 %} style="pointer-events: none; background-color: black;" >Out of Stock {% else %} >Add to Cart{% endif %}
-                        </a
-                      >
+                        {%
+                        if
+                        product.quantity
+                        <="0"
+                        %}
+                        style="pointer-events: none; background-color: black"
+                        >Out of Stock {% else %} >Add to Cart{% endif %}
+                      </a>
                     </td>
                     <td class="remove-pr">
                       <a
