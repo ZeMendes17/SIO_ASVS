@@ -57,6 +57,19 @@ def form_signin():
         headers={"Content-Type": "application/json"},
     ).json()
 
+    # All users
+    users = User.query.all()
+
+    # Check if the email already exists
+    for u in users:
+        # get the user's email key
+        email_key = E.get_key(f"{u.username.upper()}_EMAIL_KEY")
+        # decrypt the user's email
+        email = E.chacha20_decrypt(u.email, email_key)
+        if email == request.form["email"]:
+            flash("Email já existe!", category="danger")
+            return redirect(url_for("register.regist"))
+
     if not recaptcha_request["tokenProperties"]["valid"]:
         flash("Recaptcha inválido!", category="danger")
         return redirect(url_for("register.regist"))

@@ -102,7 +102,6 @@ def form_login():
         verification_code = totp.now()
 
         try:
-            print(verification_code)
             # Save the verification code and timestamp in the database
             user.verification_code = verification_code
             user.verification_timestamp = int(time.time())
@@ -172,49 +171,54 @@ def authorize_google():
         user = User.query.filter_by(email=email).first()
         # Check if user exists with that email
 
-        if not user:
-            # create a new user
-            key = E.generate_key()
-            # store the key
-            E.store_key(key, f"{username.upper()}_EMAIL_KEY")
-            # encrypt the email
-            email = E.chacha20_encrypt(email, key)
-            if email is None:
-                flash("Erro ao encriptar email do utilizador!", category="danger")
-                return redirect(url_for("auth.login"))
-            new_user = User(
-                username=username,
-                email=email,
-                image=picture,
-                name=name,
-                google_account=True,
-            )
-            try:
-                db.session.add(new_user)
-                db.session.commit()
+        # All users
+        users = User.query.all()
 
-                new_cart = Cart(customer_id=new_user.id)
-                db.session.add(new_cart)
-                db.session.commit()
-
-                new_wishlist = Wishlist(customer_id=new_user.id)
-                db.session.add(new_wishlist)
-                db.session.commit()
-
-                login_user(new_user)
-                return redirect(url_for("main.index"))
-            except Exception as e:
-                db.session.rollback()
-                flash("Erro ao criar utilizador ou carrinho!")
+        # Check if the email already exists
+        for u in users:
+            # get the user's email key
+            email_key = E.get_key(f"{u.username.upper()}_EMAIL_KEY")
+            # decrypt the user's email
+            u_email = E.chacha20_decrypt(u.email, email_key)
+            if email == u_email:
+                flash("Email já existe!", category="danger")
                 return redirect(url_for("auth.login"))
 
-        else:
-            if user.google_account:
-                login_user(user)
-                return redirect(url_for("main.index"))
-            else:
-                flash("Já existe um utilizador com esse email!", category="danger")
-                return redirect(url_for("auth.login"))
+        # create a new user
+        key = E.generate_key()
+        # store the key
+        E.store_key(key, f"{username.upper()}_EMAIL_KEY")
+        # encrypt the email
+        email = E.chacha20_encrypt(email, key)
+        if email is None:
+            flash("Erro ao encriptar email do utilizador!", category="danger")
+            return redirect(url_for("auth.login"))
+        new_user = User(
+            username=username,
+            email=email,
+            image=picture,
+            name=name,
+            google_account=True,
+        )
+
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+
+            new_cart = Cart(customer_id=new_user.id)
+            db.session.add(new_cart)
+            db.session.commit()
+
+            new_wishlist = Wishlist(customer_id=new_user.id)
+            db.session.add(new_wishlist)
+            db.session.commit()
+
+            login_user(new_user)
+            return redirect(url_for("main.index"))
+        except Exception as e:
+            db.session.rollback()
+            flash("Erro ao criar utilizador ou carrinho!")
+            return redirect(url_for("auth.login"))
     except Exception as e:
         # Handle unexpected errors
         return handle_error(e)
