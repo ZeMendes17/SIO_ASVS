@@ -61,7 +61,8 @@ The vulnerabilities were mitigated by using the following techniques:
   - Encrypt sensitive data.
 - Algorithms (V6.2.1)
   - Use strong encryption algorithms.
-  
+
+In the following sections, we will describe the vulnerabilities that were identified and the techniques that were used to mitigate them.
 
 ## 3. Vulnerabilities Solved
 
