@@ -606,11 +606,17 @@ if not recaptcha_request["tokenProperties"]["valid"]:
 
 This prevents automated attacks by checking if the user is a human or a robot. If the user is a human, the user is allowed to login. If the user is a robot, the user is not allowed to login.
 
+![](./images/recaptcha.png)
+
 ## 3.11 General Authenticator Requirements (V2.2.2)
 
 "Verify that the use of weak authenticators (such as SMS and email) is limited to secondary verification and transaction approval and not as a replacement for more secure authentication methods. Verify that stronger methods are offered before weak methods, users are aware of the risks, or that proper measures are in place to limit the risks of account compromise."
 
 On our website, we provide a user-friendly registration process utilizing email, where users are required to input a valid email address. During the login phase, an additional layer of security is implemented through the introduction of a verification code, enhancing the overall account protection. Moreover, recognizing the importance of convenience and accessibility, we also offer a seamless alternative by enabling users to log in using their Google credentials. This feature is powered by OAuth 2.0 and OIDC (OpenID Connect) login protocols, ensuring a secure and efficient authentication process for those who prefer the simplicity of connecting through their Google accounts.
+
+![](./images/google_login.png)
+
+When users log in using their Google credentials, they are redirected to the Google login page, where they are asked to login using their Google credentials.
 
 ## 3.12 General Authenticator Requirements (V2.2.3)
 
@@ -653,6 +659,10 @@ def send_email_notification(email):
 ```
 
 This ensures that the user receives the verification code and the confirmation for profile data changes via email, ensuring a secure and reliable communication channel for these critical account activities.
+
+![](./images/enter_code.png)
+
+![](./images/email_code.png)
 
 ## 3.13 Credential Recovery Requirements (V2.5.5)
 
@@ -699,6 +709,8 @@ else:
     flash("Invalid Verification Code", category="danger")
     return redirect(url_for("auth.login"))
 ```
+
+![](./images/code_expriration.png)
 
 ## 3.15 Out of Band Verifier Requirements (V2.7.3)
 
