@@ -6,7 +6,6 @@ To execute the project, cd into the app_sec folder and follow the instructions p
 
 ```bash
 cd app_sec
-touch .env
 chmod u+x run.sh
 ./run.sh
 ```
