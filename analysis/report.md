@@ -322,3 +322,357 @@ CMD ["bash", "-c", "\
 ```
 
 This dependencies ensure that all the dependencies are up to date and that there are no vulnerabilities in the dependencies.
+
+## 3.8 Password Security Credentials (V2.1.1) & (V2.1.2) & (V2.1.3) & (V2.1.4) & (V2.1.9)
+
+"Verify that user set passwords are at least 12 characters in length (after multiple spaces are combined). ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
+
+"Verify that passwords 64 characters or longer are permitted but may be no longer than 128 characters. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
+
+"Verify that password truncation is not performed. However, consecutive multiple spaces may be replaced by a single space. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
+
+"Verify that any printable Unicode character, including language neutral characters such as spaces and Emojis are permitted in passwords."
+
+Passwords are an important part of any application. It is important to ensure that the passwords are secure and that they cannot be easily guessed by attackers. This is done by enforcing a password policy that ensures that the passwords are secure.
+
+In our application, we enforce a password policy that ensures that the passwords are secure. This is done by using the following code:
+
+```python
+def is_valid_password(password):
+    # Check if the password is breached
+    if check_breached_password(password):
+        flash("A senha foi comprometida, tente outra")
+        return False
+    # Ensure password length is within the allowed range
+    elif len(password) < 12:
+        flash("A senha deve ter pelo menos 12 caracteres (espaços não incluídos)")
+        return False
+    elif len(password) > 128:
+        flash("A senha deve ter no máximo 128 caracteres (espaços não incluídos)")
+        return False
+    # Check if all characters in the password are printable Unicode characters
+    elif not all(c.isprintable() for c in password):
+        flash("A senha deve conter apenas caracteres Unicode imprimíveis")
+        return False
+
+    return True
+```
+
+This code ensures that the passwords are secure and that they cannot be easily guessed by attackers. This is done by enforcing a password policy that ensures that the passwords are secure.
+
+## 3.9 Password Security Credentials (V2.1.7)
+
+"Verify that passwords submitted during account registration, login, and password change are checked against a set of breached passwords either locally (such as the top 1,000 or 10,000 most common passwords which match the system's password policy) or using an external API. If using an API a zero knowledge proof or other mechanism should be used to ensure that the plain text password is not sent or used in verifying the breach status of the password. If the password is breached, the application must require the user to set a new non-breached password. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
+
+```python
+def check_breached_password(password):
+    # Hash the password using SHA-1
+    sha1_hash = hashlib.sha1(password.encode("utf-8")).hexdigest().upper()
+
+    # Send the first 5 characters of the hashed password to the HIBP API
+    api_url = f"https://api.pwnedpasswords.com/range/{sha1_hash[:5]}"
+    response = requests.get(api_url)
+
+    if response.status_code == 200:
+        # Check if the remaining part of the hashed password appears in the response
+        tail = sha1_hash[5:]
+        if tail in response.text:
+            return True  # Password is breached
+    return False  # Password is not breached
+```
+
+We use the HIBP API to check if the password is breached. This is done by sending the first 5 characters of the hashed password to the HIBP API. If the remaining part of the hashed password appears in the response, the password is breached. If the password is breached, the user is asked to set a new password.
+
+## 3.9 Password Security Credentials (V2.1.8) & (V2.1.12)
+
+"Verify that a password strength meter is provided to help users set a stronger password."
+
+"Verify that the user can choose to either temporarily view the entire masked password, or temporarily view the last typed character of the password on platforms that do not have this as built-in functionality."
+
+We use the zxcvbn library to check the strength of the password. This library returns a score from 0 to 4. The higher the score, the stronger the password. We use this score to display the strength of the password to the user.
+
+```html
+<label for="password">Password:</label>
+<div id="togglePasswordContainer" style="display: flex; align-items: center;">
+  <input
+    type="password"
+    name="password"
+    id="password"
+    oninput="checkPasswordStrength()"
+    required
+  />
+  <button
+    type="button"
+    id="togglePasswordButton"
+    onclick="togglePasswordVisibility()"
+    style="margin-left: 10px; background-color: white; border: none; display: flex; align-items: center;"
+  >
+    <img
+      src="./static/images/eye-on-icon.png"
+      alt="Show Password"
+      id="eyeIcon"
+      style="width: 20px; height: auto; border: none; padding: 0; margin: auto;"
+    />
+  </button>
+</div>
+
+<label for="confirm_password">Confirm Password:</label>
+<input type="password" name="confirm_password" /><br />
+<progress id="password-strength-meter" max="5" value="0"></progress>
+<p id="password-strength-text">Password Strength: Very Weak</p>
+```
+
+```javascript
+function checkPasswordStrength() {
+  var password = document.getElementById("password").value;
+  var result = zxcvbn(password);
+
+  // Update the password strength meter
+  var strengthMeter = document.getElementById("password-strength-meter");
+  strengthMeter.value = result.score + 1;
+
+  // Update the text based on the password strength
+  var strengthText = document.getElementById("password-strength-text");
+  strengthText.innerHTML =
+    "Password Strength: " + getStrengthText(result.score);
+
+  // Adicione a lógica para alterar a cor do texto com base na força da senha
+  switch (result.score) {
+    case 0:
+      strengthText.style.color = "red"; // Very Weak
+      strengthMeter.style.background = "red";
+      break;
+    case 1:
+      strengthText.style.color = "orange"; // Weak
+      strengthMeter.style.background = "orange";
+      break;
+    case 2:
+      strengthText.style.color = "yellow"; // Moderate
+      strengthMeter.style.background = "yellow";
+      break;
+    case 3:
+      strengthText.style.color = "green"; // Strong
+      strengthMeter.style.background = "green";
+      break;
+    case 4:
+      strengthText.style.color = "darkgreen"; // Very Strong
+      strengthMeter.style.background = "darkgreen";
+      break;
+    default:
+      strengthText.style.color = "#333"; // Cor padrão
+      strengthMeter.style.background = "#eee";
+  }
+}
+
+function getStrengthText(score) {
+  switch (score) {
+    case 0:
+      return "Very Weak";
+    case 1:
+      return "Weak";
+    case 2:
+      return "Moderate";
+    case 3:
+      return "Strong";
+    case 4:
+      return "Very Strong";
+    default:
+      return "";
+  }
+}
+```
+
+We also allow the user to view the password by clicking on the eye icon. This is done by using the following code:
+
+```html
+<button
+  type="button"
+  id="togglePasswordButton"
+  onclick="togglePasswordVisibility()"
+  style="margin-left: 10px; background-color: white; border: none; display: flex; align-items: center;"
+>
+  <img
+    src="./static/images/eye-on-icon.png"
+    alt="Show Password"
+    id="eyeIcon"
+    style="width: 20px; height: auto; border: none; padding: 0; margin: auto;"
+  />
+</button>
+```
+
+```javascript
+function togglePasswordVisibility() {
+  var passwordInput = document.getElementById("password");
+  var eyeIcon = document.getElementById("eyeIcon");
+
+  if (passwordInput.type === "password") {
+    passwordInput.type = "text";
+    eyeIcon.src = "./static/images/eye-off-icon.png";
+  } else {
+    passwordInput.type = "password";
+    eyeIcon.src = "./static/images/eye-on-icon.png";
+  }
+}
+```
+
+## 3.10 General Authenticator Requirements (V2.2.1)
+
+"Verify that anti-automation controls are effective at mitigating breached credential testing, brute force, and account lockout attacks. Such controls include blocking the most common breached passwords, soft lockouts, rate limiting, CAPTCHA, ever increasing delays between attempts, IP address restrictions, or risk-based restrictions such as location, first login on a device, recent attempts to unlock the account, or similar. Verify that no more than 100 failed attempts per hour is possible on a single account."
+
+We used google recaptcha to prevent automated attacks. This is done by using the following code:
+
+```html
+<button
+  class="g-recaptcha"
+  data-sitekey="6LeFQDkpAAAAABKdp4pinNyxhov9pQeL493lwh1_"
+  data-callback="onSubmit"
+  data-action="submit"
+  style="width: 100%; background-color:#162442; color:white"
+>
+  Sign In
+</button>
+```
+
+```javascript
+function onSubmit(token) {
+  document.getElementById("form").submit();
+}
+```
+
+```python
+recaptcha_response = request.form["g-recaptcha-response"]
+
+recaptcha_request = requests.post(
+    "https://recaptchaenterprise.googleapis.com/v1/projects/deti-store-1703363018508/assessments?key=AIzaSyDHxOKFmFzw4ijJ-pUmTDRLFLvrnJtOxzw",
+    json={
+        "event": {
+            "token": recaptcha_response,
+            "expectedAction": "register",
+            "siteKey": "6LeFQDkpAAAAABKdp4pinNyxhov9pQeL493lwh1_",
+        }
+    },
+    headers={"Content-Type": "application/json"},
+).json()
+
+if not recaptcha_request["tokenProperties"]["valid"]:
+    flash("Recaptcha inválido!", category="danger")
+    return redirect(url_for("auth.login"))
+```
+
+This prevents automated attacks by checking if the user is a human or a robot. If the user is a human, the user is allowed to login. If the user is a robot, the user is not allowed to login.
+
+## 3.11 General Authenticator Requirements (V2.2.2)
+
+"Verify that the use of weak authenticators (such as SMS and email) is limited to secondary verification and transaction approval and not as a replacement for more secure authentication methods. Verify that stronger methods are offered before weak methods, users are aware of the risks, or that proper measures are in place to limit the risks of account compromise."
+
+On our website, we provide a user-friendly registration process utilizing email, where users are required to input a valid email address. During the login phase, an additional layer of security is implemented through the introduction of a verification code, enhancing the overall account protection. Moreover, recognizing the importance of convenience and accessibility, we also offer a seamless alternative by enabling users to log in using their Google credentials. This feature is powered by OAuth 2.0 and OIDC (OpenID Connect) login protocols, ensuring a secure and efficient authentication process for those who prefer the simplicity of connecting through their Google accounts.
+
+## 3.12 General Authenticator Requirements (V2.2.3)
+
+"Verify that secure notifications are sent to users after updates to authentication details, such as credential resets, email or address changes, logging in from unknown or risky locations. The use of push notifications - rather than SMS or email - is preferred, but in the absence of push notifications, SMS or email is acceptable as long as no sensitive information is disclosed in the notification."
+
+Users will exclusively receive their login verification codes and confirmations for profile data changes via email, ensuring a secure and reliable communication channel for these critical account activities. This is done by using the following code:
+
+```python
+def send_otp_via_email(otp_code, email):
+try:
+    email_server = current_app.config["EMAIL_SERVER"]
+
+    subject = "Verification Code"
+    body = f"Your verification code is: {otp_code}"
+
+    message = f"From: detiStore@outlook.com\r\nTo: {email}\r\nSubject: {subject}\r\n\r\n{body}"
+
+    # Sending email
+    email_server.sendmail("detiStore@outlook.com", [email], message)
+except Exception as e:
+    # Handle unexpected errors
+    return handle_error(e)
+```
+
+```python
+def send_email_notification(email):
+    try:
+        email_server = current_app.config["EMAIL_SERVER"]
+
+        subject = "DetiStore - Dados da sua conta foram alterados"
+        body = "Dados da sua conta foram alterados. Se não foi você, por favor entre em contato com o suporte."
+
+        message = f"From: detiStore@outlook.com\r\nTo: {email}\r\nSubject: {subject}\r\n\r\n{body}"
+
+        # Sending email
+        email_server.sendmail("detiStore@outlook.com", [email], message.encode("utf-8"))
+    except Exception as e:
+        # Handle unexpected errors
+        return handle_error(e)
+```
+
+This ensures that the user receives the verification code and the confirmation for profile data changes via email, ensuring a secure and reliable communication channel for these critical account activities.
+
+## 3.13 Credential Recovery Requirements (V2.5.5)
+
+"Verify that if an authentication factor is changed or replaced, that the user is notified of this event."
+
+In our application, we allow users to change all their profile data. They are notified of this event by email. This is done by using the following code:
+
+```python
+def send_email_notification(email):
+    try:
+        email_server = current_app.config["EMAIL_SERVER"]
+
+        subject = "DetiStore - Dados da sua conta foram alterados"
+        body = "Dados da sua conta foram alterados. Se não foi você, por favor entre em contato com o suporte."
+
+        message = f"From: detiStore@outlook.com\r\nTo: {email}\r\nSubject: {subject}\r\n\r\n{body}"
+
+        # Sending email
+        email_server.sendmail("detiStore@outlook.com", [email], message.encode("utf-8"))
+    except Exception as e:
+        # Handle unexpected errors
+        return handle_error(e)
+```
+
+## 3.14 Out of Band Verifier Requirements (V2.7.2)
+
+"Verify that the out of band verifier expires out of band authentication requests, codes, or tokens after 10 minutes."
+
+In our application, the verification code expires after 10 minutes. This is done by using the following code:
+
+```python
+verification_code = request.form["otp"]
+
+user = User.query.filter_by(username=username).first()
+
+if user.verification_code == verification_code:
+    if (
+        user.verification_timestamp
+        and (int(time.time()) - user.verification_timestamp) < 600
+    ):
+        login_user(user)
+        return redirect(url_for("main.index"))
+else:
+    flash("Invalid Verification Code", category="danger")
+    return redirect(url_for("auth.login"))
+```
+
+## 3.15 Out of Band Verifier Requirements (V2.7.3)
+
+"Verify that the out of band verifier authentication requests, codes, or tokens are only usable once, and only for the original authentication request."
+
+In our application, the verification code can only be used once. This is done by using the following code:
+
+```python
+verification_code = totp.now()
+
+try:
+    # Save the verification code and timestamp in the database
+    user.verification_code = verification_code
+    user.verification_timestamp = int(time.time())
+    db.session.commit()
+    # Send the verification code via email
+    send_otp_via_email(verification_code, email)
+    return render_template("enter_otp.html", username=username)
+except Exception as e:
+    flash("Erro ao guardar código de verificação!", category="danger")
+    return redirect(url_for("auth.login"))
+```

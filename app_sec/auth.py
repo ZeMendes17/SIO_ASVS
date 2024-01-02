@@ -43,7 +43,6 @@ def login():
                 user = User.query.filter_by(username=username).first()
 
                 if user.verification_code == verification_code:
-                    # Check if the verification code is still valid (e.g., within a certain time limit)
                     if (
                         user.verification_timestamp
                         and (int(time.time()) - user.verification_timestamp) < 600
