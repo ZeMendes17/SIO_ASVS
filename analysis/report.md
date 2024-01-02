@@ -333,6 +333,8 @@ This dependencies ensure that all the dependencies are up to date and that there
 
 "Verify that any printable Unicode character, including language neutral characters such as spaces and Emojis are permitted in passwords."
 
+"Verify that there are no password composition rules limiting the type of characters permitted. There should be no requirement for upper or lower case or numbers or special characters. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
+
 Passwords are an important part of any application. It is important to ensure that the passwords are secure and that they cannot be easily guessed by attackers. This is done by enforcing a password policy that ensures that the passwords are secure.
 
 In our application, we enforce a password policy that ensures that the passwords are secure. This is done by using the following code:
@@ -360,6 +362,38 @@ def is_valid_password(password):
 
 This code ensures that the passwords are secure and that they cannot be easily guessed by attackers. This is done by enforcing a password policy that ensures that the passwords are secure.
 
+![](./images/password_too_short.png)
+
+In the image above we try to register a user with a password that is shorter than 12 characters, showing an error message to the user, as expected.
+
+![](./images/password_too_long.png)
+
+In the image above we try to register a user with a password that is longer than 128 characters, showing an error message to the user, as expected.
+
+In order to ensure that consecutive multiple spaces are replaced by a single space, we use the following code:
+
+```python
+processed_key = re.sub(" +", " ", key)
+if not is_valid_password(processed_key):
+    return redirect(url_for("register.regist"))
+```
+
+Using the re library, we replace all consecutive multiple spaces by a single space with the sub function. This is donw using the password
+that the user inputs, validating it only after the replacement.
+
+To ensure that any printable Unicode character, including language neutral characters such as spaces and Emojis are permitted in passwords, we use the following code:
+
+```python
+elif not all(c.isprintable() for c in password):
+    flash("A senha deve conter apenas caracteres Unicode imprimíveis")
+    return False
+```
+
+Using the isprintable function, we ensure that any printable Unicode character is permitted in passwords. In case the password contains a non-printable Unicode character, an error message is displayed to the user.
+
+Finnaly, no password composition rules limiting the type of characters permitted are enforced, as seen in the function is_valid_password
+located above.
+
 ## 3.9 Password Security Credentials (V2.1.7)
 
 "Verify that passwords submitted during account registration, login, and password change are checked against a set of breached passwords either locally (such as the top 1,000 or 10,000 most common passwords which match the system's password policy) or using an external API. If using an API a zero knowledge proof or other mechanism should be used to ensure that the plain text password is not sent or used in verifying the breach status of the password. If the password is breached, the application must require the user to set a new non-breached password. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
@@ -382,6 +416,10 @@ def check_breached_password(password):
 ```
 
 We use the HIBP API to check if the password is breached. This is done by sending the first 5 characters of the hashed password to the HIBP API. If the remaining part of the hashed password appears in the response, the password is breached. If the password is breached, the user is asked to set a new password.
+
+![](./images/password_breached.png)
+
+In the image above we try to register a user with a password that is breached (in this example "123456789"), showing an error message to the user, as expected.
 
 ## 3.9 Password Security Credentials (V2.1.8) & (V2.1.12)
 
@@ -482,6 +520,11 @@ function getStrengthText(score) {
 }
 ```
 
+![](./gifs/password_strength.gif)
+
+As we can see above, the password strength is displayed to the user while we types the password. This allows the user to choose a stronger password.
+
+
 We also allow the user to view the password by clicking on the eye icon. This is done by using the following code:
 
 ```html
@@ -514,6 +557,8 @@ function togglePasswordVisibility() {
   }
 }
 ```
+
+![](./gifs/password_show.gif)
 
 ## 3.10 General Authenticator Requirements (V2.2.1)
 
