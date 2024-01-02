@@ -10,7 +10,7 @@
 
 2. Overview
 
-3. Vulnerabilites
+3. Vulnerabilities
 
 ## 1. Introduction
 
@@ -22,7 +22,7 @@ The application is a simple online store that allows users to browse and purchas
 
 The main objective of this project is to identify and mitigate vulnerabilities in the application. The vulnerabilities are divided into various categories following the ASVS standard. The vulnerabilities are described in the following sections.
 
-## 3. Vulnerabilites Solved
+## 3. Vulnerabilities Solved
 
 ### 3.1 Communications Security Requirements (V9.1.1)
 
