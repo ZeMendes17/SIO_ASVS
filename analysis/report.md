@@ -6,11 +6,9 @@
 
 ## Index
 
-1. Introduction
-
-2. Overview
-
-3. Vulnerabilities
+- [1. Introduction](#1-introduction)
+- [2. Overview](#2-overview)
+- [3. Vulnerabilities](#3-vulnerabilities-solved)
 
 ## 1. Introduction
 
