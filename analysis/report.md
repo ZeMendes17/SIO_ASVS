@@ -687,6 +687,8 @@ def send_email_notification(email):
         return handle_error(e)
 ```
 
+![](./images/email_profile_change.jpg)
+
 ## 3.14 Out of Band Verifier Requirements (V2.7.2)
 
 "Verify that the out of band verifier expires out of band authentication requests, codes, or tokens after 10 minutes."
@@ -732,4 +734,169 @@ try:
 except Exception as e:
     flash("Erro ao guardar código de verificação!", category="danger")
     return redirect(url_for("auth.login"))
+```
+
+## 3.16 Data Classification (V6.1.1) & (V6.1.3)
+
+"Verify that regulated private data is stored encrypted while at rest, such as Personally Identifiable Information (PII), sensitive personal information, or data assessed likely to be subject to EU's GDPR."
+
+"Verify that regulated financial data is stored encrypted while at rest, such as financial accounts, defaults or credit history, tax records, pay history, beneficiaries, or de-anonymized market or research records."
+
+In order to perform the encryption and decryption of the user's PII (Personally Identifiable Information), we used the cryptography library. This library allows us to encrypt and decrypt the user's PII using the ChaCha20 algorithm. This algorithm is a symmetric stream cipher that uses a 32-byte key and a 16-byte nonce. This algorithm is secure, fast and does not require padding,
+making it ideal for encrypting and decrypting the user's PII.
+
+```python
+def chacha20_encrypt(message, key):
+    iv = os.urandom(16)
+
+    try:
+        cipher = Cipher(algorithms.ChaCha20(key, iv), mode=None, backend=default_backend())
+        encryptor = cipher.encryptor()
+        ciphertext = encryptor.update(message.encode()) + encryptor.finalize()
+        return iv + ciphertext
+    except Exception as e:
+        print("Encryption error:", e)
+        return None
+
+def chacha20_decrypt(ciphertext, key):
+    iv = ciphertext[:16]
+
+    try:
+        cipher = Cipher(algorithms.ChaCha20(key, iv), mode=None, backend=default_backend())
+        decryptor = cipher.decryptor()
+        plaintext = decryptor.update(ciphertext[16:]) + decryptor.finalize()
+        return plaintext.decode()
+    except Exception as e:
+        print("Decryption error:", e)
+        return None
+```
+
+The keys are being stored in a configuration file (.env), ensuring that they are not hardcoded in the source code, or in the database. Consequently, to store and retrieve the keys, the following functions were implemented:
+
+```python
+def store_key(key, name):
+    os.environ[name] = key.hex()
+    # if there is no .env file, create one
+    if not os.path.exists('.env'):
+        open('.env', 'w').close()
+    # if the key is already in the .env file, remove it
+    with open('.env', 'r') as f:
+        lines = f.readlines()
+    with open('.env', 'w') as f:
+        for line in lines:
+            if not line.startswith(name):
+                f.write(line)
+
+    # make it persistent
+    with open('.env', 'a') as f:
+        f.write(f'{name}={key.hex()}\n')
+
+def get_key(name):
+    if name in os.environ:
+        return bytes.fromhex(os.environ[name])
+    else:
+        # read from .env file
+        with open('.env', 'r') as f:
+            for line in f:
+                if line.startswith(name):
+                    return bytes.fromhex(line.split('=')[1])
+```
+
+With this, all we need to do to encrypt is to store the key and then call the chacha20_encrypt function. To decrypt, we just need to call the chacha20_decrypt function, using the key that was previously stored. Example:
+
+```python
+# encrypt phone number
+key = E.generate_key()
+# store the key
+E.store_key(key, f"{user.username.upper()}_PHONE_KEY")
+user.phone = E.chacha20_encrypt(phone, key)
+if user.phone is None:
+    flash("Erro ao encriptar número de telefone!", category="danger")
+    return redirect(url_for("profile.changeProfile", id=user.id))
+
+# decrypt phone number
+phone = E.chacha20_decrypt(
+  user.phone, E.get_key(f"{user.username.upper()}_PHONE_KEY")
+)
+```
+
+Finally, to ensure that the user's PII is encrypted (V6.1.1), we are encrypting the user's email and phone number, and to ensure that the user's financial data is encrypted (V6.1.3), we are encrypting the shipping and billing addresses and the tracking number (so that, if a tracking system is implemented, the atackers cannot access where the package is or where it is going to be delivered).
+
+## 3.17 Algorithms (V6.2.1)
+
+"Verify that all cryptographic modules fail securely, and errors are handled in a way that does not enable Padding Oracle attacks."
+
+In our application, we use the cryptography library to encrypt and decrypt the user's PII. This library uses the ChaCha20 algorithm, a symmetric stream cipher that does not require padding, making it secure against Padding Oracle attacks.
+
+To ensure that the cryptographic modules fail securely, these use a try-except block to handle any errors that may occur:
+
+```python
+def chacha20_encrypt(message, key):
+    iv = os.urandom(16)
+
+    try:
+        cipher = Cipher(algorithms.ChaCha20(key, iv), mode=None, backend=default_backend())
+        encryptor = cipher.encryptor()
+        ciphertext = encryptor.update(message.encode()) + encryptor.finalize()
+        return iv + ciphertext
+    except Exception as e:
+        print("Encryption error:", e)
+        return None
+
+def chacha20_decrypt(ciphertext, key):
+    iv = ciphertext[:16]
+
+    try:
+        cipher = Cipher(algorithms.ChaCha20(key, iv), mode=None, backend=default_backend())
+        decryptor = cipher.decryptor()
+        plaintext = decryptor.update(ciphertext[16:]) + decryptor.finalize()
+        return plaintext.decode()
+    except Exception as e:
+        print("Decryption error:", e)
+        return None
+```
+
+When calling this functions, we check if the return value is None. If it is, we display an error message to the user:
+
+```python
+# encrypt the tracking number
+key = E.generate_key()
+E.store_key(
+    key,
+    f"{current_user.username.upper()}{number_of_orders+1}_TRACKING_NUMBER_KEY",
+)
+
+tracking_number_enc = E.chacha20_encrypt(generate_tracking_number(), key)
+
+if tracking_number_enc is None:
+    flash("Erro ao encriptar tracking number!", category="danger")
+    return redirect(url_for("checkout.check"))
+
+
+# encrypt the shipping address
+key = E.generate_key()
+E.store_key(
+    key,
+    f"{current_user.username.upper()}{number_of_orders+1}_SHIPPING_ADDRESS_KEY",
+)
+
+shipping_address_enc = E.chacha20_encrypt(address, key)
+
+if shipping_address_enc is None:
+    flash("Erro ao encriptar shipping address!", category="danger")
+    return redirect(url_for("checkout.check"))
+
+
+# encrypt the billing address
+key = E.generate_key()
+E.store_key(
+    key,
+    f"{current_user.username.upper()}{number_of_orders+1}_BILLING_ADDRESS_KEY",
+)
+
+billing_address_enc = E.chacha20_encrypt(address2, key)
+
+if billing_address_enc is None:
+    flash("Erro ao encriptar billing address!", category="danger")
+    return redirect(url_for("checkout.check"))
 ```
