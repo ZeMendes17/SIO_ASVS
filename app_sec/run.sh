@@ -8,4 +8,3 @@ docker compose build
 docker compose up -d
 
 open https://localhost:8080
-open https://localhost:8080/generate/database

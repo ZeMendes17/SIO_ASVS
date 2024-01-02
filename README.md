@@ -1,12 +1,10 @@
 # Second SIO project
 
-
 ## Execute
 
 To execute the project, cd into the app_sec folder and follow the instructions presented bellow.
 
 ```bash
-touch .env
 chmod u+x run.sh
 ./run.sh
 ```
