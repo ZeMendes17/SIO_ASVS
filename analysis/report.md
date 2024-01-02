@@ -18,7 +18,7 @@ This project was developed for the "Informatics Security and Organizations" cour
 
 The application is a simple online store that allows users to browse and purchase products. The application is divided into two main components: the client and the server. The client is a web application that allows users to browse and purchase products. The server is a Flask application that provides the client with the necessary data to display the products and allows users to purchase products.
 
-The main objective of this project is to identify and mitigate vulnerabilities in the application. The vulnerabilities are divided into various categories following the ASVS standard. The vulnerabilities are described in the following sections.
+The main objective of this project is to identify and mitigate vulnerabilities in the application. The vulnerabilities are divided into various categories following the ASVS standard.
 
 A careful analysis of the application was performed in order to identify vulnerabilities. Out of the 280 ASVS requirements our system complied with 72 at first. After the analysis, we were able to mitigate 24 vulnerabilities, resulting in a total of 96 ASVS requirements complied. Almost all of the level 1 requirements were met, and some level 2 requirements were also met.
 
@@ -44,7 +44,7 @@ The vulnerabilities were mitigated by using the following techniques:
   - Display the strength of the password to the user.
   - Allow the user to view the password.
 - General Authenticator Requirements (V2.2.1)
-  - Prevent automated attacks by checking if the user is a human or a robot.
+  - Prevent automated attacks by checking if the user is a human or a robot, used google recaptcha.
 - General Authenticator Requirements (V2.2.2)
   - Allow users to log in using their Google credentials.
 - General Authenticator Requirements (V2.2.3)
@@ -59,6 +59,14 @@ The vulnerabilities were mitigated by using the following techniques:
   - Encrypt sensitive data.
 - Algorithms (V6.2.1)
   - Use strong encryption algorithms.
+
+We were asked to only solve 8 vulnerabilities, but we decided to solve more than 8 in order to improve the overall security of the application and to learn more about security. Nonteheless, we consider that the following vulnerabilities were the most important to solve:
+
+- Communications Security Requirements (V9.1.1)
+- Data Classification (V6.1.1) & (V6.1.3)
+- Algorithms (V6.2.1)
+- General Authenticator Requirements (V2.2.1)
+- Password Security Credentials (V2.1.1) & (V2.1.2) & (V2.1.3) & (V2.1.4) & (V2.1.9)
 
 In the following sections, we will describe the vulnerabilities that were identified and the techniques that were used to mitigate them.
 
