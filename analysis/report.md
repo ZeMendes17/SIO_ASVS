@@ -22,6 +22,47 @@ The application is a simple online store that allows users to browse and purchas
 
 The main objective of this project is to identify and mitigate vulnerabilities in the application. The vulnerabilities are divided into various categories following the ASVS standard. The vulnerabilities are described in the following sections.
 
+A careful analysis of the application was performed in order to identify vulnerabilities. Out of the 102 AVSV requirements our system complied with 72 at first. After the analysis, we were able to mitigate 24 vulnerabilities, resulting in a total of 96 AVSV requirements complied.
+
+The vulnerabilities were mitigated by using the following techniques:
+
+- Communications Security Requirements (V9.1.1)
+  - Use HTTPS to encrypt the data transmitted between the client and the server.
+- File Upload Requirements (V12.1.2)
+  - Ensure that the uploaded files are not too large.
+- Session Logout and Timeout Requirements (V3.3.2)
+  - Terminate the user's session when the user logs out or when the session expires.
+- Error Handling (V7.4.1)
+  - Display a generic error message to the user.
+- Log Content Requirements (V7.1.1) & (V7.1.2)
+  - Remove all the logs that contain information about the application, user's credentials, payment details, etc.
+- Dependency (V14.2.1)
+  - Use a dependency checker to ensure that all the dependencies are up to date and that there are no vulnerabilities in the dependencies.
+- Password Security Credentials (V2.1.1) & (V2.1.2) & (V2.1.3) & (V2.1.4) & (V2.1.9)
+  - Enforce a password policy that ensures that the passwords are secure.
+- Password Security Credentials (V2.1.7)
+  - Check if the password is breached.
+- Password Security Credentials (V2.1.8) & (V2.1.12)
+  - Display the strength of the password to the user.
+  - Allow the user to view the password.
+- General Authenticator Requirements (V2.2.1)
+  - Prevent automated attacks by checking if the user is a human or a robot.
+- General Authenticator Requirements (V2.2.2)
+  - Allow users to log in using their Google credentials.
+- General Authenticator Requirements (V2.2.3)
+  - Ensure a secure and reliable communication channel for critical account activities.
+- Credential Recovery Requirements (V2.5.5)
+  - Notify the user when an authentication factor is changed or replaced.
+- Out of Band Verifier Requirements (V2.7.2)
+  - Verify the user's identity by sending a verification code to the user's email.
+- Out of Band Verifier Requirements (V2.7.3)
+  - Verification code is valid for a single use.
+- Data Classification (V6.1.1) & (V6.1.3)
+  - Encrypt sensitive data.
+- Algorithms (V6.2.1)
+  - Use strong encryption algorithms.
+  
+
 ## 3. Vulnerabilities Solved
 
 ### 3.1 Communications Security Requirements (V9.1.1)
