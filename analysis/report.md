@@ -20,7 +20,7 @@ The application is a simple online store that allows users to browse and purchas
 
 The main objective of this project is to identify and mitigate vulnerabilities in the application. The vulnerabilities are divided into various categories following the ASVS standard.
 
-A careful analysis of the application was performed in order to identify vulnerabilities. Out of the 280 ASVS requirements our system complied with 72 at first. After the analysis, we were able to mitigate 24 vulnerabilities, resulting in a total of 96 ASVS requirements complied. Almost all of the level 1 requirements were met, and some level 2 requirements were also met.
+A careful analysis of the application was performed in order to identify vulnerabilities. Out of the 280 ASVS requirements our system complied with 53 at first. After the analysis, we were able to mitigate 24 vulnerabilities, resulting in a total of 77 ASVS requirements complied. Almost all of the level 1 requirements were met, and some level 2 requirements were also met.
 
 The vulnerabilities were mitigated by using the following techniques:
 
