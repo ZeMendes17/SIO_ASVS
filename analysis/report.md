@@ -383,9 +383,7 @@ This dependencies ensure that all the dependencies are up to date and that there
 
 "Verify that there are no password composition rules limiting the type of characters permitted. There should be no requirement for upper or lower case or numbers or special characters. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
 
-Passwords are an important part of any application. It is important to ensure that the passwords are secure and that they cannot be easily guessed by attackers. This is done by enforcing a password policy that ensures that the passwords are secure.
-
-In our application, we enforce a password policy that ensures that the passwords are secure. This is done by using the following code:
+Passwords are an important part of any application. It is important to ensure that the passwords are secure and that they cannot be easily guessed by attackers. This is done by enforcing a password policy that ensures that the passwords are secure:
 
 ```python
 def is_valid_password(password):
@@ -408,7 +406,6 @@ def is_valid_password(password):
     return True
 ```
 
-This code ensures that the passwords are secure and that they cannot be easily guessed by attackers. This is done by enforcing a password policy that ensures that the passwords are secure.
 
 ![](./images/password_too_short.png)
 
@@ -469,7 +466,7 @@ We use the HIBP API to check if the password is breached. This is done by sendin
 
 In the image above we try to register a user with a password that is breached (in this example "123456789"), showing an error message to the user, as expected.
 
-## 3.9 Password Security Credentials (V2.1.8) & (V2.1.12)
+## 3.10 Password Security Credentials (V2.1.8) & (V2.1.12)
 
 "Verify that a password strength meter is provided to help users set a stronger password."
 
@@ -608,7 +605,7 @@ function togglePasswordVisibility() {
 
 ![](./gifs/password_show.gif)
 
-## 3.10 General Authenticator Requirements (V2.2.1)
+## 3.11 General Authenticator Requirements (V2.2.1)
 
 "Verify that anti-automation controls are effective at mitigating breached credential testing, brute force, and account lockout attacks. Such controls include blocking the most common breached passwords, soft lockouts, rate limiting, CAPTCHA, ever increasing delays between attempts, IP address restrictions, or risk-based restrictions such as location, first login on a device, recent attempts to unlock the account, or similar. Verify that no more than 100 failed attempts per hour is possible on a single account."
 
@@ -656,7 +653,7 @@ This prevents automated attacks by checking if the user is a human or a robot. I
 
 ![](./images/recaptcha.png)
 
-## 3.11 General Authenticator Requirements (V2.2.2)
+## 3.12 General Authenticator Requirements (V2.2.2)
 
 "Verify that the use of weak authenticators (such as SMS and email) is limited to secondary verification and transaction approval and not as a replacement for more secure authentication methods. Verify that stronger methods are offered before weak methods, users are aware of the risks, or that proper measures are in place to limit the risks of account compromise."
 
@@ -666,7 +663,7 @@ On our website, we provide a user-friendly registration process utilizing email,
 
 When users log in using their Google credentials, they are redirected to the Google login page, where they are asked to login using their Google credentials.
 
-## 3.12 General Authenticator Requirements (V2.2.3)
+## 3.13 General Authenticator Requirements (V2.2.3)
 
 "Verify that secure notifications are sent to users after updates to authentication details, such as credential resets, email or address changes, logging in from unknown or risky locations. The use of push notifications - rather than SMS or email - is preferred, but in the absence of push notifications, SMS or email is acceptable as long as no sensitive information is disclosed in the notification."
 
@@ -712,7 +709,7 @@ This ensures that the user receives the verification code and the confirmation f
 
 ![](./images/email_code.png)
 
-## 3.13 Credential Recovery Requirements (V2.5.5)
+## 3.14 Credential Recovery Requirements (V2.5.5)
 
 "Verify that if an authentication factor is changed or replaced, that the user is notified of this event."
 
@@ -737,7 +734,7 @@ def send_email_notification(email):
 
 ![](./images/email_profile_change.jpg)
 
-## 3.14 Out of Band Verifier Requirements (V2.7.2)
+## 3.15 Out of Band Verifier Requirements (V2.7.2)
 
 "Verify that the out of band verifier expires out of band authentication requests, codes, or tokens after 10 minutes."
 
@@ -762,7 +759,7 @@ else:
 
 ![](./images/code_expriration.png)
 
-## 3.15 Out of Band Verifier Requirements (V2.7.3)
+## 3.16 Out of Band Verifier Requirements (V2.7.3)
 
 "Verify that the out of band verifier authentication requests, codes, or tokens are only usable once, and only for the original authentication request."
 
@@ -784,7 +781,7 @@ except Exception as e:
     return redirect(url_for("auth.login"))
 ```
 
-## 3.16 Data Classification (V6.1.1) & (V6.1.3)
+## 3.17 Data Classification (V6.1.1) & (V6.1.3)
 
 "Verify that regulated private data is stored encrypted while at rest, such as Personally Identifiable Information (PII), sensitive personal information, or data assessed likely to be subject to EU's GDPR."
 
@@ -870,7 +867,7 @@ phone = E.chacha20_decrypt(
 
 Finally, to ensure that the user's PII is encrypted (V6.1.1), we are encrypting the user's email and phone number, and to ensure that the user's financial data is encrypted (V6.1.3), we are encrypting the shipping and billing addresses and the tracking number (so that, if a tracking system is implemented, the atackers cannot access where the package is or where it is going to be delivered).
 
-## 3.17 Algorithms (V6.2.1)
+## 3.18 Algorithms (V6.2.1)
 
 "Verify that all cryptographic modules fail securely, and errors are handled in a way that does not enable Padding Oracle attacks."
 
