@@ -21,3 +21,7 @@ https://localhost:8080/generate/database
 - Duarte Cruz **107359**
 - Zé Mendes **107188**
 - Filipe Obrist **107471**
+
+# Grade
+
+20.0
